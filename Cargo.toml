@@ -3,6 +3,12 @@ name = "implicit3d"
 version = "0.7.0"
 authors = ["Henning Meyer <tutmann@gmail.com>"]
 
+description = "3d implicit geometry."
+repository = "https://github.com/hmeyer/implicit3d"
+readme = "README.md"
+keywords = ["implict", "3d", "round", "csg", "primitives"]
+license = "GPL-3.0"
+
 [lib]
 name = "implicit3d"
 path = "src/lib.rs"
