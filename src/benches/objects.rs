@@ -1,15 +1,15 @@
 extern crate alga;
 #[macro_use]
 extern crate bencher;
+extern crate implicit3d;
 extern crate nalgebra;
 extern crate num_traits;
-extern crate truescad_primitive;
 use alga::general::Real;
 use bencher::Bencher;
+use implicit3d::{Intersection, Object, SlabX, SlabY, SlabZ, Sphere, Twister};
 use nalgebra as na;
 use num_traits::{Float, FloatConst};
 use std::fmt::Debug;
-use truescad_primitive::{Intersection, Object, SlabX, SlabY, SlabZ, Sphere, Twister};
 
 
 const STEPS: usize = 50;

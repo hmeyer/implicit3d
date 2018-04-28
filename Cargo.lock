@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "implicit3d"
-version = "0.6.2"
+version = "0.7.0"
 dependencies = [
  "alga 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "approx 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
