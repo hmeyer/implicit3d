@@ -4,7 +4,7 @@ use na;
 use num_traits::Float;
 
 
-// A cylinder along the Z-Axis
+/// A cylinder along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cylinder<S: Real> {
     radius: S,
@@ -12,6 +12,7 @@ pub struct Cylinder<S: Real> {
 }
 
 impl<S: Real + Float> Cylinder<S> {
+    /// Create a new infinite Cylinder (along the Z-Axis) of radius r.
     pub fn new(r: S) -> Box<Cylinder<S>> {
         Box::new(Cylinder {
             radius: r,
@@ -44,7 +45,7 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> 
     }
 }
 
-// A cone along the Z-Axis
+/// A cone along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
 pub struct Cone<S: Real> {
     slope: S,
@@ -55,6 +56,7 @@ pub struct Cone<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Cone<S> {
+    /// Create a new infinite Cone (along the Z-Axis) for a given slope and and offset from origin.
     pub fn new(slope: S, offset: S) -> Box<Cone<S>> {
         let _1: S = From::from(1f32);
         Box::new(Cone {

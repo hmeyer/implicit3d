@@ -4,6 +4,9 @@ use alga::linear::Similarity;
 use na;
 use num_traits::{Float, FloatConst};
 
+/// Bender create an implicit function that represents a bended version of it's input.
+/// The object will be bend around the Z-Axis.
+/// E.g. bending a cylinder along the X-Axis (and translated away from the Z-Axis) will result in a Torus.
 #[derive(Clone, Debug)]
 pub struct Bender<S: Real> {
     object: Box<Object<S>>,
@@ -52,7 +55,8 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bende
 }
 
 impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
-    // o: Object to be twisted, w: width (x) for one full rotation
+    /// Create a new bent object.
+    /// o: Object to be bent, w: width (x) for one full rotation
     pub fn new(o: Box<Object<S>>, w: S) -> Box<Bender<S>> {
         let bbox = BoundingBox::new(
             na::Point3::new(-o.bbox().max.y, -o.bbox().max.y, o.bbox().min.z),

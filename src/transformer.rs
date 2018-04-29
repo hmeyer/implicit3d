@@ -6,6 +6,9 @@ use num_traits::Float;
 
 
 #[derive(Clone, Debug)]
+/// AffineTransformer is a primitive that takes an object as input and allows to modify it using
+/// affine transforms.
+/// Usually it is used indirectly through ```Object::scale()```, ```Object::translate()``` or ```Object::rotate()```.
 pub struct AffineTransformer<S: Real> {
     object: Box<Object<S>>,
     transform: na::Matrix4<S>,
@@ -88,12 +91,15 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
             }
         }
     }
+    /// Create a new translated version of the input.
     pub fn new_translate(o: Box<Object<S>>, v: na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).translate(v)
     }
+    /// Create a new rotated version of the input.
     pub fn new_rotate(o: Box<Object<S>>, r: na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).rotate(r)
     }
+    /// Create a new scaled version of the input.
     pub fn new_scale(o: Box<Object<S>>, s: na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).scale(s)
     }

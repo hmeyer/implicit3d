@@ -3,6 +3,7 @@ use alga::general::Real;
 use na;
 use num_traits::Float;
 
+/// A sphere. Simple.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sphere<S: Real> {
     radius: S,
@@ -10,6 +11,7 @@ pub struct Sphere<S: Real> {
 }
 
 impl<S: Real + Float> Sphere<S> {
+    /// Create a new sphere of radius r.
     pub fn new(r: S) -> Box<Sphere<S>> {
         Box::new(Sphere {
             radius: r,

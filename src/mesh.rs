@@ -11,6 +11,11 @@ struct Face<S: Real + Debug> {
     vertices: [usize; 3],
 }
 
+/// Mesh generates an implicit function from a 3d object mesh.
+/// Warning! This primitive is currently horribly inefficient.
+/// That is, for each point it iterates over all faces and finds the closest.
+/// This implementation desperately needs some performance improvements, e.g. kd-tree support or
+/// similar.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Mesh<S: Real + Debug> {
     bbox: BoundingBox<S>,
@@ -18,11 +23,8 @@ pub struct Mesh<S: Real + Debug> {
     faces: Vec<Face<S>>,
 }
 
-/// Warning! This primitive is currently horribly inefficient.
-/// That is, for each point it iterates over all faces and finds the closest.
-/// This implementation desperately needs some performance improvements, e.g. kd-tree support or
-/// similar.
 impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
+    /// Create a new Mesh from a [STL file](https://en.wikipedia.org/wiki/STL_(file_format)).
     pub fn new(stl_filename: &str) -> ::std::io::Result<Box<Mesh<S>>> {
         let mut file = ::std::fs::OpenOptions::new().read(true).open(stl_filename)?;
         let mesh = ::stl_io::read_stl(&mut file)?;

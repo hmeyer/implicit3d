@@ -80,6 +80,9 @@ impl<A: 'static + Axis, S: Float + From<f32> + Real> Object<S> for Slab<A, S> {
     }
 }
 
+/// A Slab along the X-Axis (in the YZ-Plane).
 pub type SlabX<S> = Slab<AxisX, S>;
+/// A Slab along the Y-Axis (in the XZ-Plane).
 pub type SlabY<S> = Slab<AxisY, S>;
+/// A Slab along the Z-Axis (in the XY-Plane).
 pub type SlabZ<S> = Slab<AxisZ, S>;

@@ -3,9 +3,10 @@ use alga::general::Real;
 use na;
 use num_traits::Float;
 
-pub const FADE_RANGE: f32 = 0.1;
-pub const R_MULTIPLIER: f32 = 1.0;
+const FADE_RANGE: f32 = 0.1;
+const R_MULTIPLIER: f32 = 1.0;
 
+/// Union create an implict function as the union of its inputs.
 #[derive(Clone, Debug)]
 pub struct Union<S: Real> {
     objs: Vec<Box<Object<S>>>,
@@ -16,6 +17,7 @@ pub struct Union<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Union<S> {
+    /// Create a union of all the objects in v. The union will be rounded, if r > 0.
     pub fn from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
         match v.len() {
             0 => None,
@@ -97,6 +99,7 @@ impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
     }
 }
 
+/// Intersect objects.
 #[derive(Clone, Debug)]
 pub struct Intersection<S: Real> {
     objs: Vec<Box<Object<S>>>,
@@ -107,6 +110,7 @@ pub struct Intersection<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Intersection<S> {
+    /// Create an intersection of the objects in v. The intersection will be rounded, if r > 0.
     pub fn from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
         match v.len() {
             0 => None,
@@ -126,6 +130,9 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
             }
         }
     }
+    /// Create a Difference from Vec. The resulting object is v[0] minus all the other objects.
+    /// Minus is implemented as intersection with negation.
+    /// The difference will be rounded, if r > 0.
     pub fn difference_from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
         match v.len() {
             0 => None,

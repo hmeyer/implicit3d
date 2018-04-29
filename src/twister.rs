@@ -4,6 +4,7 @@ use alga::linear::{Similarity, Transformation};
 use na;
 use num_traits::Float;
 
+/// Twister will twist an object by rotating it along the Z-Axis.
 #[derive(Clone, Debug)]
 pub struct Twister<S: Real> {
     object: Box<Object<S>>,
@@ -35,7 +36,8 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twist
 }
 
 impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
-    // o: Object to be twisted, h: height for one full rotation
+    /// Create a twisted version ob o.
+    /// o: Object to be twisted, h: height for one full rotation
     pub fn new(o: Box<Object<S>>, h: S) -> Box<Twister<S>> {
         let _2pi: S = S::PI() * From::from(2.);
         let mx = Float::max(Float::abs(o.bbox().min.x), Float::abs(o.bbox().max.x));
