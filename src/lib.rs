@@ -35,7 +35,7 @@ extern crate nalgebra as na;
 extern crate num_traits;
 extern crate stl_io;
 use alga::general::Real;
-use bbox::BoundingBox;
+pub use bbox::BoundingBox;
 use num_traits::Float;
 use std::fmt::Debug;
 
