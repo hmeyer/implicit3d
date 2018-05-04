@@ -17,15 +17,15 @@ impl<S: Real + Float> Cylinder<S> {
         Box::new(Cylinder {
             radius: r,
             bbox: BoundingBox::new(
-                na::Point3::new(-r, -r, S::neg_infinity()),
-                na::Point3::new(r, r, S::infinity()),
+                &na::Point3::new(-r, -r, S::neg_infinity()),
+                &na::Point3::new(r, r, S::infinity()),
             ),
         })
     }
 }
 
 impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             let _0: S = From::from(0f32);
@@ -38,7 +38,7 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> 
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         let _0: S = From::from(0f32);
         let pv = na::Vector3::new(p.x, p.y, _0);
         return pv.normalize();
@@ -73,16 +73,16 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cone<S> {
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
-    fn set_bbox(&mut self, bbox: BoundingBox<S>) {
-        self.bbox = bbox
+    fn set_bbox(&mut self, bbox: &BoundingBox<S>) {
+        self.bbox = bbox.clone();
     }
-    fn approx_value(&self, p: na::Point3<S>, _: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, _: S) -> S {
         let radius = Float::abs(self.slope * (p.z + self.offset));
         let _0: S = From::from(0f32);
         let pv = na::Vector3::new(p.x, p.y, _0);
         return (pv.norm() - radius) * self.distance_multiplier;
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         let s = Float::signum(p.z + self.offset);
         let _0: S = From::from(0f32);
         let mut pv = na::Vector3::new(p.x, p.y, _0);

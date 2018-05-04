@@ -1,11 +1,12 @@
-//! ```implicit3d``` is a crate for creating [3d implicit functions](https://en.wikipedia.org/wiki/Implicit_function).
+//! ```implicit3d``` is a crate for creating
+//! [3d implicit functions](https://en.wikipedia.org/wiki/Implicit_function).
 //! Implicit functions evaluate to a scalar value for each point the 3d space.
 //! They can be used to described object surfaces. If the function evaluates to negative values
 //! the point is in the object, if the function evaluates positve this is outside the object.
 //! If the function evaluates to zero the point is on the object surface.
 //! This library allows to create implicit functions for 3d primitives (sphere, cylinder, cone,
-//! box). Those primitives can be combined using [CSG](https://en.wikipedia.org/wiki/Constructive_solid_geometry)
-//! and transformed.
+//! box). Those primitives can be combined using
+//! [CSG](https://en.wikipedia.org/wiki/Constructive_solid_geometry) and transformed.
 //!
 //! # Examples
 //!
@@ -76,10 +77,11 @@ const ALWAYS_PRECISE: f32 = 1.;
 const EPSILON: f32 = 1e-10;
 
 
-/// Get a normal from an Object a some point. Do this using approximating the derivative with deltas.
- fn normal_from_object<S: Debug + Real + Float + From<f32>>(
+/// Get a normal from an Object a some point. Do this using approximating the derivative with
+/// deltas.
+fn normal_from_object<S: Debug + Real + Float + From<f32>>(
     f: &Object<S>,
-    p: na::Point3<S>,
+    p: &na::Point3<S>,
 ) -> na::Vector3<S> {
     let null: S = From::from(0.0);
     let e: S = From::from(EPSILON);
@@ -88,9 +90,9 @@ const EPSILON: f32 = 1e-10;
     let epsilon_y = na::Vector3::<S>::new(null, e, null);
     let epsilon_z = na::Vector3::<S>::new(null, null, e);
     let center = f.approx_value(p, a);
-    let dx = f.approx_value(&p + epsilon_x, a) - center;
-    let dy = f.approx_value(&p + epsilon_y, a) - center;
-    let dz = f.approx_value(&p + epsilon_z, a) - center;
+    let dx = f.approx_value(&(p + epsilon_x), a) - center;
+    let dy = f.approx_value(&(p + epsilon_y), a) - center;
+    let dz = f.approx_value(&(p + epsilon_z), a) - center;
     na::Vector3::<S>::new(dx, dy, dz).normalize()
 }
 
@@ -100,7 +102,7 @@ pub trait Object<S: Real + Float + From<f32>>
     /// Get the Bounding Box of this Object.
     fn bbox(&self) -> &BoundingBox<S>;
     /// Explicitly set the Bounding Box.
-    fn set_bbox(&mut self, _: BoundingBox<S>) {
+    fn set_bbox(&mut self, _: &BoundingBox<S>) {
         unimplemented!();
     }
     /// Allows to set parameters.
@@ -109,23 +111,23 @@ pub trait Object<S: Real + Float + From<f32>>
     /// If positive, value is guarateed to be the minimum distance to the object surface.
     /// return some approximation (which is always larger then the proper value).
     /// Only do a proper calculation, for values smaller then slack.
-    fn approx_value(&self, _: na::Point3<S>, _: S) -> S {
+    fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
         unimplemented!();
     }
     /// Evaluate the normal of ```self``` at the given point.
-    fn normal(&self, _: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
         unimplemented!();
     }
     /// Return a translated version of ```self```.
-    fn translate(&self, v: na::Vector3<S>) -> Box<Object<S>> {
+    fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::new_translate(self.clone_box(), v)
     }
     /// Return a rotated version of ```self```.
-    fn rotate(&self, r: na::Vector3<S>) -> Box<Object<S>> {
+    fn rotate(&self, r: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::new_rotate(self.clone_box(), r)
     }
     /// Return a scaled version of ```self```.
-    fn scale(&self, s: na::Vector3<S>) -> Box<Object<S>> {
+    fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::new_scale(self.clone_box(), s)
     }
 }

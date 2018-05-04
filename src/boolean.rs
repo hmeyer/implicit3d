@@ -23,15 +23,15 @@ impl<S: Real + Float + From<f32>> Union<S> {
             0 => None,
             1 => Some(v.pop().unwrap()),
             _ => {
-                let bbox = v.iter()
+                let mut bbox = v.iter()
                     .fold(BoundingBox::<S>::neg_infinity(), |union_box, x| {
                         union_box.union(x.bbox())
-                    })
-                    .dilate(r * From::from(0.2f32)); // dilate by some factor of r
+                    });
+                bbox.dilate(r * From::from(0.2f32)); // dilate by some factor of r
                 Some(Box::new(Union {
                     objs: v,
                     r: r,
-                    bbox: bbox,
+                    bbox: bbox.clone(),
                     exact_range: r * From::from(R_MULTIPLIER),
                     fade_range: From::from(FADE_RANGE),
                 }))
@@ -41,7 +41,7 @@ impl<S: Real + Float + From<f32>> Union<S> {
 }
 
 impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             rvmin(
@@ -66,7 +66,7 @@ impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
             o.set_parameters(p);
         }
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         // Find the two smallest values with their indices.
         let (v0, v1) = self.objs.iter().enumerate().fold(
             ((0, S::infinity()), (0, S::infinity())),
@@ -147,7 +147,7 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
 }
 
 impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             rvmax(
@@ -172,7 +172,7 @@ impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
             o.set_parameters(p);
         }
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         // Find the two largest values with their indices.
         let (v0, v1) = self.objs.iter().enumerate().fold(
             ((0, S::neg_infinity()), (0, S::neg_infinity())),
@@ -225,10 +225,10 @@ impl<S: Real + Float + From<f32>> Negation<S> {
 }
 
 impl<S: Real + From<f32> + Float> Object<S> for Negation<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         -self.object.approx_value(p, slack)
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         let _n1: S = From::from(-1f32);
         self.object.normal(p) * _n1
     }

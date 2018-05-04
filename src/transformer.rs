@@ -17,11 +17,11 @@ pub struct AffineTransformer<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             self.object
-                .approx_value(self.transform.transform_point(&p), slack / self.scale_min)
+                .approx_value(&self.transform.transform_point(&p), slack / self.scale_min)
                 * self.scale_min
         } else {
             approx
@@ -33,21 +33,21 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
     fn set_parameters(&mut self, p: &PrimitiveParameters<S>) {
         self.object.set_parameters(p);
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         self.transform
-            .transform_vector(&self.object.normal(self.transform.transform_point(&p)))
+            .transform_vector(&self.object.normal(&self.transform.transform_point(&p)))
             .normalize()
     }
-    fn translate(&self, v: na::Vector3<S>) -> Box<Object<S>> {
+    fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
         let new_trans = self.transform.append_translation(&-v);
         AffineTransformer::new_with_scaler(self.object.clone(), new_trans, self.scale_min)
     }
-    fn rotate(&self, r: na::Vector3<S>) -> Box<Object<S>> {
+    fn rotate(&self, r: &na::Vector3<S>) -> Box<Object<S>> {
         let euler = ::na::Rotation::from_euler_angles(r.x, r.y, r.z).to_homogeneous();
         let new_trans = self.transform * euler;
         AffineTransformer::new_with_scaler(self.object.clone(), new_trans, self.scale_min)
     }
-    fn scale(&self, s: na::Vector3<S>) -> Box<Object<S>> {
+    fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
         let _1: S = From::from(1f32);
         let new_trans = self.transform
             .append_nonuniform_scaling(&na::Vector3::new(_1 / s.x, _1 / s.y, _1 / s.z));
@@ -92,15 +92,15 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
         }
     }
     /// Create a new translated version of the input.
-    pub fn new_translate(o: Box<Object<S>>, v: na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_translate(o: Box<Object<S>>, v: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).translate(v)
     }
     /// Create a new rotated version of the input.
-    pub fn new_rotate(o: Box<Object<S>>, r: na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_rotate(o: Box<Object<S>>, r: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).rotate(r)
     }
     /// Create a new scaled version of the input.
-    pub fn new_scale(o: Box<Object<S>>, s: na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_scale(o: Box<Object<S>>, s: &na::Vector3<S>) -> Box<Object<S>> {
         AffineTransformer::identity(o).scale(s)
     }
 }
@@ -128,10 +128,10 @@ mod test {
     }
 
     impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for MockObject<S> {
-        fn approx_value(&self, _: na::Point3<S>, _: S) -> S {
+        fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
             self.value
         }
-        fn normal(&self, _: na::Point3<S>) -> na::Vector3<S> {
+        fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
             self.normal.clone()
         }
         fn bbox(&self) -> &BoundingBox<S> {
@@ -142,8 +142,8 @@ mod test {
     #[test]
     fn translate() {
         let mock_object = MockObject::new(1.0, na::Vector3::new(1.0, 0.0, 0.0));
-        let translated = mock_object.translate(na::Vector3::new(0.0001, 0.0, 0.0));
+        let translated = mock_object.translate(&na::Vector3::new(0.0001, 0.0, 0.0));
         let p = na::Point3::new(1.0, 0.0, 0.0);
-        assert_eq!(mock_object.normal(p), translated.normal(p));
+        assert_eq!(mock_object.normal(&p), translated.normal(&p));
     }
 }

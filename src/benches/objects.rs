@@ -28,7 +28,7 @@ fn evaluate<S: From<f32> + Debug + Float + Real>(obj: &Object<S>) -> S {
         for _ in 0..STEPS {
             p.x = obj.bbox().min.x;
             for _ in 0..STEPS {
-                result += obj.approx_value(p, slack);
+                result += obj.approx_value(&p, slack);
                 p.x += xd;
             }
             p.y += yd;
@@ -50,7 +50,7 @@ fn normals<S: 'static + From<f32> + Debug + Float + Real>(obj: &Object<S>) -> na
         for _ in 0..STEPS {
             p.x = obj.bbox().min.x;
             for _ in 0..STEPS {
-                result += obj.normal(p);
+                result += obj.normal(&p);
                 p.x += xd;
             }
             p.y += yd;

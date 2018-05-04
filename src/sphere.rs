@@ -15,13 +15,13 @@ impl<S: Real + Float> Sphere<S> {
     pub fn new(r: S) -> Box<Sphere<S>> {
         Box::new(Sphere {
             radius: r,
-            bbox: BoundingBox::new(na::Point3::new(-r, -r, -r), na::Point3::new(r, r, r)),
+            bbox: BoundingBox::new(&na::Point3::new(-r, -r, -r), &na::Point3::new(r, r, r)),
         })
     }
 }
 
 impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             return na::Vector3::new(p.x, p.y, p.z).norm() - self.radius;
@@ -32,7 +32,7 @@ impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         return na::Vector3::new(p.x, p.y, p.z).normalize();
     }
 }

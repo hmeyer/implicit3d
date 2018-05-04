@@ -14,11 +14,11 @@ pub struct Twister<S: Real> {
 }
 
 impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twister<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             self.object
-                .approx_value(self.twist_point(p), slack / self.value_scaler)
+                .approx_value(&self.twist_point(p), slack / self.value_scaler)
                 * self.value_scaler
         } else {
             approx
@@ -30,8 +30,8 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twist
     fn set_parameters(&mut self, p: &PrimitiveParameters<S>) {
         self.object.set_parameters(p);
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
-        self.untwist_normal(self.object.normal(self.twist_point(p)), p)
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
+        self.untwist_normal(&self.object.normal(&self.twist_point(&p)), p)
     }
 }
 
@@ -52,8 +52,8 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         let scaler = tan_a / Float::sqrt(tan_a * tan_a + _1);
 
         let bbox = BoundingBox::<S>::new(
-            na::Point3::new(-r, -r, o.bbox().min.z),
-            na::Point3::new(r, r, o.bbox().max.z),
+            &na::Point3::new(-r, -r, o.bbox().min.z),
+            &na::Point3::new(r, r, o.bbox().max.z),
         );
         Box::new(Twister {
             object: o,
@@ -62,7 +62,7 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
             bbox: bbox,
         })
     }
-    fn twist_point(&self, p: na::Point3<S>) -> na::Point3<S> {
+    fn twist_point(&self, p: &na::Point3<S>) -> na::Point3<S> {
         let p2 = ::na::Point2::new(p.x, p.y);
         let angle = p.z * self.height_scaler;
         type Rota<S> = ::na::Rotation<S, ::na::U2>;
@@ -72,7 +72,7 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
     }
     // Apply tilt to the vector.
     // Since Surfaces are twisted, all normals will be tilted, depending on the radius.
-    fn tilt_normal(&self, normal: na::Vector3<S>, p: na::Point3<S>) -> na::Vector3<S> {
+    fn tilt_normal(&self, normal: na::Vector3<S>, p: &na::Point3<S>) -> na::Vector3<S> {
         let radius_v = ::na::Vector2::new(p.x, p.y);
         let radius = radius_v.norm();
         let radius_v = radius_v / radius;
@@ -93,7 +93,7 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         // Normalize.
         return result.normalize();
     }
-    fn untwist_normal(&self, v: na::Vector3<S>, p: na::Point3<S>) -> na::Vector3<S> {
+    fn untwist_normal(&self, v: &na::Vector3<S>, p: &na::Point3<S>) -> na::Vector3<S> {
         let v2 = ::na::Vector2::new(v.x, v.y);
         let angle = -p.z * self.height_scaler;
         let trans = ::na::Rotation2::new(angle);

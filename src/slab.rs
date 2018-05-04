@@ -56,7 +56,7 @@ impl<A: Axis, S: From<f32> + Real + Float> Slab<A, S> {
 
         Box::new(Slab {
             distance_from_zero: d,
-            bbox: BoundingBox::new(p_neg, p_pos),
+            bbox: BoundingBox::new(&p_neg, &p_pos),
             normal_pos: normal_pos,
             normal_neg: normal_neg,
             _phantom: ::std::marker::PhantomData,
@@ -65,13 +65,13 @@ impl<A: Axis, S: From<f32> + Real + Float> Slab<A, S> {
 }
 
 impl<A: 'static + Axis, S: Float + From<f32> + Real> Object<S> for Slab<A, S> {
-    fn approx_value(&self, p: na::Point3<S>, _: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, _: S) -> S {
         return Float::abs(p[A::value()]) - self.distance_from_zero;
     }
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         if Float::is_sign_positive(p.x) {
             return self.normal_pos.clone();
         } else {

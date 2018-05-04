@@ -54,7 +54,7 @@ impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
             faces: faces,
         }))
     }
-    fn value(&self, p: na::Point3<S>) -> S {
+    fn value(&self, p: &na::Point3<S>) -> S {
         let p = na::Vector3::new(p.x, p.y, p.z);
         let value_and_acos = self.faces.iter().fold(
             (Float::max_value(), From::from(0f64)),
@@ -242,17 +242,18 @@ fn distance_point_face<S: Debug + Real + From<f64> + Float>(
 fn bbox_for_mesh<S: Real + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> BoundingBox<S> {
     mesh.vertices
         .iter()
-        .fold(BoundingBox::neg_infinity(), |bbox, v| {
-            bbox.insert(na::Point3::new(
+        .fold(BoundingBox::neg_infinity(), |mut bbox, v| {
+            bbox.insert(&na::Point3::new(
                 From::from(v[0]),
                 From::from(v[1]),
                 From::from(v[2]),
-            ))
+            ));
+            bbox
         })
 }
 
 impl<S: Real + Float + From<f64> + From<f32>> Object<S> for Mesh<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             self.value(p)
@@ -263,7 +264,8 @@ impl<S: Real + Float + From<f64> + From<f32>> Object<S> for Mesh<S> {
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
+        // TODO: Return normal of closest triangle.
         normal_from_object(self, p)
     }
 }
@@ -439,21 +441,21 @@ mod test {
 
                 let expected_outside_dist = sign * x / 2f64.sqrt();
 
-                assert_ulps_eq!(mesh.approx_value(outside1, 0.), expected_outside_dist);
-                assert_ulps_eq!(mesh.approx_value(outside2, 0.), expected_outside_dist);
+                assert_ulps_eq!(mesh.approx_value(&outside1, 0.), expected_outside_dist);
+                assert_ulps_eq!(mesh.approx_value(&outside2, 0.), expected_outside_dist);
 
 
                 let infront = na::Point3::new(0.5 - x, 1., 0.);
                 let infront_dist = sign * na::Vector3::new(0.5 - x, 1., 0.).norm();
-                assert_ulps_eq!(mesh.approx_value(infront, 0.), infront_dist);
+                assert_ulps_eq!(mesh.approx_value(&infront, 0.), infront_dist);
 
                 let inside1 = na::Point3::new(1.0 - x, -1.0 - x, 0.);
                 let inside2 = na::Point3::new(-1.0 + x, -1.0 - x, 0.);
 
                 let expected_inside_dist = sign * -x * 2f64.sqrt();
 
-                assert_ulps_eq!(mesh.approx_value(inside1, 0.), expected_inside_dist);
-                assert_ulps_eq!(mesh.approx_value(inside2, 0.), expected_inside_dist);
+                assert_ulps_eq!(mesh.approx_value(&inside1, 0.), expected_inside_dist);
+                assert_ulps_eq!(mesh.approx_value(&inside2, 0.), expected_inside_dist);
             }
         }
     }
@@ -489,8 +491,8 @@ mod test {
 
             let expected_dist = x / 2f64.sqrt();
 
-            assert_ulps_eq!(mesh.approx_value(p1, 0.), expected_dist);
-            assert_ulps_eq!(mesh.approx_value(p2, 0.), expected_dist);
+            assert_ulps_eq!(mesh.approx_value(&p1, 0.), expected_dist);
+            assert_ulps_eq!(mesh.approx_value(&p2, 0.), expected_dist);
         }
     }
 
@@ -525,8 +527,8 @@ mod test {
 
             let expected_dist = (1.0 - x) * 2f64.sqrt();
 
-            assert_ulps_eq!(mesh.approx_value(p1, 0.), expected_dist);
-            assert_ulps_eq!(mesh.approx_value(p2, 0.), expected_dist);
+            assert_ulps_eq!(mesh.approx_value(&p1, 0.), expected_dist);
+            assert_ulps_eq!(mesh.approx_value(&p2, 0.), expected_dist);
         }
     }
 }

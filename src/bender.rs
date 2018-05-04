@@ -15,7 +15,7 @@ pub struct Bender<S: Real> {
 }
 
 impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bender<S> {
-    fn approx_value(&self, p: na::Point3<S>, slack: S) -> S {
+    fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             let mut obj_p = self.to_polar(p);
@@ -35,7 +35,7 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bende
             let x_scaler = Float::min(x_scale, From::from(1f32));
 
             obj_p.x *= self.width_scaler;
-            self.object.approx_value(obj_p, slack / x_scaler) * x_scaler
+            self.object.approx_value(&obj_p, slack / x_scaler) * x_scaler
         } else {
             approx
         }
@@ -46,11 +46,11 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bende
     fn set_parameters(&mut self, p: &PrimitiveParameters<S>) {
         self.object.set_parameters(p);
     }
-    fn normal(&self, p: na::Point3<S>) -> na::Vector3<S> {
+    fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         let polar_p = self.to_polar(p);
         let mut obj_p = polar_p;
         obj_p.x *= self.width_scaler;
-        self.bend_normal(self.object.normal(obj_p), polar_p)
+        self.bend_normal(self.object.normal(&obj_p), polar_p)
     }
 }
 
@@ -59,8 +59,8 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
     /// o: Object to be bent, w: width (x) for one full rotation
     pub fn new(o: Box<Object<S>>, w: S) -> Box<Bender<S>> {
         let bbox = BoundingBox::new(
-            na::Point3::new(-o.bbox().max.y, -o.bbox().max.y, o.bbox().min.z),
-            na::Point3::new(o.bbox().max.y, o.bbox().max.y, o.bbox().max.z),
+            &na::Point3::new(-o.bbox().max.y, -o.bbox().max.y, o.bbox().min.z),
+            &na::Point3::new(o.bbox().max.y, o.bbox().max.y, o.bbox().max.z),
         );
         let _2pi: S = S::PI() * From::from(2.);
         Box::new(Bender {
@@ -69,7 +69,7 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
             bbox: bbox,
         })
     }
-    fn to_polar(&self, p: na::Point3<S>) -> na::Point3<S> {
+    fn to_polar(&self, p: &na::Point3<S>) -> na::Point3<S> {
         let phi = Float::atan2(p.x, -p.y);
         let r = Float::hypot(p.x, p.y);
         na::Point3::new(phi, r, p.z)
