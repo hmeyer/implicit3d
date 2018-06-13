@@ -1,6 +1,6 @@
 [package]
 name = "implicit3d"
-version = "0.9.1"
+version = "0.10.0"
 authors = ["Henning Meyer <tutmann@gmail.com>"]
 
 description = "3d implicit geometry."

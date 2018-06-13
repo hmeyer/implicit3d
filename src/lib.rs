@@ -58,8 +58,8 @@ pub use self::sphere::Sphere;
 mod cylinder;
 pub use self::cylinder::{Cone, Cylinder};
 
-mod slab;
-pub use self::slab::{SlabX, SlabY, SlabZ};
+mod plane;
+pub use self::plane::{PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ};
 
 mod mesh;
 pub use self::mesh::Mesh;
