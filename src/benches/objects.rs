@@ -6,7 +6,8 @@ extern crate nalgebra;
 extern crate num_traits;
 use alga::general::Real;
 use bencher::Bencher;
-use implicit3d::{Intersection, Object, SlabX, SlabY, SlabZ, Sphere, Twister};
+use implicit3d::{Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ,
+                 Sphere, Twister};
 use nalgebra as na;
 use num_traits::{Float, FloatConst};
 use std::fmt::Debug;
@@ -72,8 +73,17 @@ fn sphere_normals<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
 fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
     let _0 = From::from(0f32);
     let _1 = From::from(1f32);
-    Intersection::from_vec(vec![SlabX::new(_1), SlabY::new(_1), SlabZ::new(_1)], _0).unwrap()
-        as Box<Object<S>>
+    Intersection::from_vec(
+        vec![
+            PlaneX::new(_1),
+            PlaneNegX::new(_1),
+            PlaneY::new(_1),
+            PlaneNegY::new(_1),
+            PlaneZ::new(_1),
+            PlaneNegZ::new(_1),
+        ],
+        _0,
+    ).unwrap() as Box<Object<S>>
 }
 
 fn cube<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {

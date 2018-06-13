@@ -15,14 +15,17 @@
 //! ```rust,no_run
 //! let sphere = implicit3d::Sphere::new(1.0);
 //! ```
-//! Create a rounded Cube (as rounded intersection of 3 slabs):
+//! Create a rounded Cube (as rounded intersection of 6 planes):
 //!
 //! ```rust,no_run
 //! use std::fs::OpenOptions;
-//! let slabx = implicit3d::SlabX::new(1.0);
-//! let slaby = implicit3d::SlabY::new(1.0);
-//! let slabz = implicit3d::SlabZ::new(1.0);
-//! let cube = implicit3d::Intersection::from_vec(vec![slabx, slaby, slabz], 0.2);
+//! let px = implicit3d::PlaneX::new(1.0);
+//! let pnx = implicit3d::PlaneNegX::new(1.0);
+//! let py = implicit3d::PlaneY::new(1.0);
+//! let pny = implicit3d::PlaneNegY::new(1.0);
+//! let pz = implicit3d::PlaneZ::new(1.0);
+//! let pnz = implicit3d::PlaneNegZ::new(1.0);
+//! let cube = implicit3d::Intersection::from_vec(vec![px, pnx, py, pny, pz, pnz], 0.2);
 //! ```
 
 #![warn(missing_docs)]
