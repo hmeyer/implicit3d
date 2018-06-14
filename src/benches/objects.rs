@@ -72,15 +72,15 @@ fn sphere_normals<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
 
 fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
     let _0 = From::from(0f32);
-    let _1 = From::from(1f32);
+    let _05 = From::from(0.5f32);
     Intersection::from_vec(
         vec![
-            PlaneX::new(_1),
-            PlaneNegX::new(_1),
-            PlaneY::new(_1),
-            PlaneNegY::new(_1),
-            PlaneZ::new(_1),
-            PlaneNegZ::new(_1),
+            PlaneX::new(_05),
+            PlaneNegX::new(_05),
+            PlaneY::new(_05),
+            PlaneNegY::new(_05),
+            PlaneZ::new(_05),
+            PlaneNegZ::new(_05),
         ],
         _0,
     ).unwrap() as Box<Object<S>>
