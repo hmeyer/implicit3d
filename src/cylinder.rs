@@ -1,8 +1,7 @@
-use {BoundingBox, Object};
 use alga::general::Real;
 use na;
 use num_traits::Float;
-
+use {BoundingBox, Object};
 
 /// A cylinder along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
@@ -90,5 +89,15 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cone<S> {
         pv *= self.distance_multiplier;
         pv.z = -s * self.normal_multiplier;
         return pv;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
     }
 }

@@ -1,10 +1,9 @@
-use {BoundingBox, Object};
 use alga::general::Real;
 use na;
 use num_traits::Float;
+use {BoundingBox, Object};
 
-pub trait Axis
-    : ::std::fmt::Debug + Clone + ::std::marker::Sync + ::std::marker::Send {
+pub trait Axis: ::std::fmt::Debug + Clone + ::std::marker::Sync + ::std::marker::Send {
     fn value() -> usize;
     fn inverted() -> bool;
 }
@@ -91,7 +90,6 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
         let _0: S = From::from(0f32);
         let mut normal = na::Vector3::new(_0, _0, _0);
 
-
         if A::inverted() {
             p_neg[A::value()] = -d;
             normal[A::value()] = From::from(-1.);
@@ -99,7 +97,6 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
             p_pos[A::value()] = d;
             normal[A::value()] = From::from(1.);
         }
-
 
         Box::new(Plane {
             distance_from_zero: d,
@@ -140,3 +137,13 @@ pub type PlaneNegY<S> = Plane<AxisNegY, S>;
 pub type PlaneZ<S> = Plane<AxisZ, S>;
 /// A negative XZ-Plane
 pub type PlaneNegZ<S> = Plane<AxisNegZ, S>;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
+    }
+}

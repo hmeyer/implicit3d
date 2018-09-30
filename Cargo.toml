@@ -1,6 +1,6 @@
 [package]
 name = "implicit3d"
-version = "0.10.1"
+version = "0.11.0"
 authors = ["Henning Meyer <tutmann@gmail.com>"]
 
 description = "3d implicit geometry."
@@ -14,15 +14,15 @@ name = "implicit3d"
 path = "src/lib.rs"
 
 [dependencies]
-nalgebra = "0.14"
-alga = "0.5"
+nalgebra = "0.16"
+alga = "0.7"
 stl_io = "0.3"
-bbox = "0.8"
+bbox = "0.9"
 num-traits = "0.2"
 
 [dev-dependencies]
 bencher = "0.1.*"
-approx = "0.1"
+approx = "0.3"
 
 [[bench]]
 name = "objects"

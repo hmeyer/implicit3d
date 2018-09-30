@@ -1,7 +1,7 @@
-use {normal_from_object, BoundingBox, Object, PrimitiveParameters, ALWAYS_PRECISE};
 use alga::general::Real;
 use na;
 use num_traits::Float;
+use {normal_from_object, BoundingBox, Object, PrimitiveParameters, ALWAYS_PRECISE};
 
 const FADE_RANGE: f32 = 0.1;
 const R_MULTIPLIER: f32 = 1.0;
@@ -23,7 +23,8 @@ impl<S: Real + Float + From<f32>> Union<S> {
             0 => None,
             1 => Some(v.pop().unwrap()),
             _ => {
-                let mut bbox = v.iter()
+                let mut bbox = v
+                    .iter()
                     .fold(BoundingBox::<S>::neg_infinity(), |union_box, x| {
                         union_box.union(x.bbox())
                     });
@@ -45,7 +46,8 @@ impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             rvmin(
-                &self.objs
+                &self
+                    .objs
                     .iter()
                     .map(|o| o.approx_value(p, slack + self.r))
                     .collect::<Vec<S>>(),
@@ -116,7 +118,8 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
             0 => None,
             1 => Some(v.pop().unwrap()),
             _ => {
-                let bbox = v.iter()
+                let bbox = v
+                    .iter()
                     .fold(BoundingBox::<S>::infinity(), |intersection_box, x| {
                         intersection_box.intersection(x.bbox())
                     });
@@ -151,7 +154,8 @@ impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
         let approx = self.bbox.distance(p);
         if approx <= slack {
             rvmax(
-                &self.objs
+                &self
+                    .objs
                     .iter()
                     .map(|o| o.approx_value(p, slack + self.r))
                     .collect::<Vec<S>>(),
@@ -219,8 +223,7 @@ impl<S: Real + Float + From<f32>> Negation<S> {
                     object: o.clone(),
                     infinity_bbox: BoundingBox::<S>::infinity(),
                 }) as Box<Object<S>>
-            })
-            .collect()
+            }).collect()
     }
 }
 
@@ -260,7 +263,8 @@ fn rvmin<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
     let min_plus_r = minimum + r;
     let r4 = r / From::from(4f32);
     // Inpired by http://iquilezles.org/www/articles/smin/smin.htm
-    let exp_sum = v.iter()
+    let exp_sum = v
+        .iter()
         .filter(|&x| x < &min_plus_r)
         .fold(From::from(0f32), |sum: S, x| sum + (-*x / r4).exp());
     return Float::ln(exp_sum) * -r4;
@@ -288,8 +292,19 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
     }
     let max_minus_r = maximum - r;
     let r4 = r / From::from(4f32);
-    let exp_sum = v.iter()
+    let exp_sum = v
+        .iter()
         .filter(|&x| x > &max_minus_r)
         .fold(From::from(0f32), |sum: S, x| sum + (*x / r4).exp());
     return Float::ln(exp_sum) * r4;
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
+    }
 }

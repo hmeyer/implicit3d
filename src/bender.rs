@@ -1,8 +1,8 @@
-use {BoundingBox, Object, PrimitiveParameters};
 use alga::general::Real;
 use alga::linear::Similarity;
 use na;
 use num_traits::{Float, FloatConst};
+use {BoundingBox, Object, PrimitiveParameters};
 
 /// Bender create an implicit function that represents a bended version of it's input.
 /// The object will be bend around the Z-Axis.
@@ -90,5 +90,15 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
         let trans = ::na::Rotation2::new(phi);
         let rv2 = trans.rotate_vector(&v2);
         na::Vector3::new(rv2.x, rv2.y, v.z)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
     }
 }

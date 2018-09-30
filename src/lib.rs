@@ -79,7 +79,6 @@ pub struct PrimitiveParameters<S> {
 const ALWAYS_PRECISE: f32 = 1.;
 const EPSILON: f32 = 1e-10;
 
-
 /// Get a normal from an Object a some point. Do this using approximating the derivative with
 /// deltas.
 fn normal_from_object<S: Debug + Real + Float + From<f32>>(
@@ -100,8 +99,7 @@ fn normal_from_object<S: Debug + Real + Float + From<f32>>(
 }
 
 /// Object is the basic trait for any 3d implicit function.
-pub trait Object<S: Real + Float + From<f32>>
-    : ObjectClone<S> + Debug + Sync + Send {
+pub trait Object<S: Real + Float + From<f32>>: ObjectClone<S> + Debug + Sync + Send {
     /// Get the Bounding Box of this Object.
     fn bbox(&self) -> &BoundingBox<S>;
     /// Explicitly set the Bounding Box.
@@ -168,5 +166,15 @@ impl<S> PartialEq for Box<Object<S>> {
 impl<S> PartialOrd for Box<Object<S>> {
     fn partial_cmp(&self, _: &Box<Object<S>>) -> Option<::std::cmp::Ordering> {
         None
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
     }
 }

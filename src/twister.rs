@@ -1,8 +1,8 @@
-use {BoundingBox, Object, PrimitiveParameters};
 use alga::general::Real;
 use alga::linear::{Similarity, Transformation};
 use na;
 use num_traits::Float;
+use {BoundingBox, Object, PrimitiveParameters};
 
 /// Twister will twist an object by rotating it along the Z-Axis.
 #[derive(Clone, Debug)]
@@ -99,5 +99,15 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         let trans = ::na::Rotation2::new(angle);
         let rv2 = trans.rotate_vector(&v2);
         self.tilt_normal(na::Vector3::new(rv2.x, rv2.y, v.z), p)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
     }
 }

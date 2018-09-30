@@ -1,7 +1,7 @@
-use {BoundingBox, Object};
 use alga::general::Real;
 use na;
 use num_traits::Float;
+use {BoundingBox, Object};
 
 /// A sphere. Simple.
 #[derive(Clone, Debug, PartialEq)]
@@ -34,5 +34,15 @@ impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         return na::Vector3::new(p.x, p.y, p.z).normalize();
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        assert!(true);
     }
 }
