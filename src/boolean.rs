@@ -303,8 +303,67 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
 mod test {
     use super::*;
 
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct MockObject<S: Real> {
+        value: S,
+        normal: na::Vector3<S>,
+        bbox: BoundingBox<S>,
+    }
+
+    impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
+        pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
+            Box::new(MockObject {
+                value: value,
+                normal: normal,
+                bbox: BoundingBox::infinity(),
+            })
+        }
+    }
+
+    impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for MockObject<S> {
+        fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
+            self.value
+        }
+        fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
+            self.normal.clone()
+        }
+        fn bbox(&self) -> &BoundingBox<S> {
+            &self.bbox
+        }
+    }
+
     #[test]
-    fn empty() {
-        assert!(true);
+    fn union() {
+        let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
+        let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
+        let union = Union::from_vec(vec![m1, m2], 0.).unwrap();
+        assert_eq!(union.approx_value(&na::Point3::new(0., 0., 0.), 0.), 1.);
+        assert_eq!(
+            union.normal(&na::Point3::new(0., 0., 0.)),
+            na::Vector3::new(1., 0., 0.)
+        );
+    }
+
+    #[test]
+    fn intersection() {
+        let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
+        let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
+        let is = Intersection::from_vec(vec![m1, m2], 0.).unwrap();
+        assert_eq!(is.approx_value(&na::Point3::new(0., 0., 0.), 0.), 2.);
+        assert_eq!(
+            is.normal(&na::Point3::new(0., 0., 0.)),
+            na::Vector3::new(0., 1., 0.)
+        );
+    }
+
+    #[test]
+    fn negation() {
+        let m = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
+        let n = Negation::from_vec(vec![m])[0].clone();
+        assert_eq!(n.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_eq!(
+            n.normal(&na::Point3::new(0., 0., 0.)),
+            na::Vector3::new(-1., 0., 0.)
+        );
     }
 }

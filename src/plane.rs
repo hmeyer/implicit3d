@@ -143,7 +143,14 @@ mod test {
     use super::*;
 
     #[test]
-    fn empty() {
-        assert!(true);
+    fn simple() {
+        let px = PlaneX::new(10.);
+        assert_eq!(px.approx_value(&na::Point3::new(0., 0., 0.), 0.), -10.);
+        assert_eq!(px.approx_value(&na::Point3::new(10., 0., 0.), 0.), 0.);
+        assert_eq!(px.approx_value(&na::Point3::new(20., 0., 0.), 0.), 10.);
+        assert_eq!(
+            px.approx_value(&na::Point3::new(20., 1000., 1000.), 0.),
+            10.
+        );
     }
 }

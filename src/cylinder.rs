@@ -97,7 +97,19 @@ mod test {
     use super::*;
 
     #[test]
-    fn empty() {
-        assert!(true);
+    fn cylinder() {
+        let cyl = Cylinder::new(1.0);
+        assert_eq!(cyl.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_eq!(cyl.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
+        assert_eq!(cyl.approx_value(&na::Point3::new(0., 1., 0.), 0.), 0.);
+        assert_eq!(cyl.approx_value(&na::Point3::new(0., 10., 0.), 0.), 9.);
+        assert_eq!(cyl.approx_value(&na::Point3::new(0., 10., 1000.), 0.), 9.);
+    }
+
+    #[test]
+    fn cone() {
+        let c = Cone::new(2., 10.);
+        assert_eq!(c.approx_value(&na::Point3::new(0., 0., -10.), 0.), 0.);
+        assert_eq!(c.approx_value(&na::Point3::new(2., 0., -11.), 0.), 0.);
     }
 }

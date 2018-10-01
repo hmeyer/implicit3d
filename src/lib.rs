@@ -168,13 +168,3 @@ impl<S> PartialOrd for Box<Object<S>> {
         None
     }
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn empty() {
-        assert!(true);
-    }
-}

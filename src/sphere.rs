@@ -42,7 +42,10 @@ mod test {
     use super::*;
 
     #[test]
-    fn empty() {
-        assert!(true);
+    fn simple() {
+        let s = Sphere::new(1.);
+        assert_eq!(s.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_eq!(s.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
+        assert_eq!(s.approx_value(&na::Point3::new(2., 0., 0.), 0.), 1.);
     }
 }

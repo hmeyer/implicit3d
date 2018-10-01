@@ -97,8 +97,65 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
 mod test {
     use super::*;
 
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct MockObject {
+        value: f64,
+        normal: na::Vector3<f64>,
+        bbox: BoundingBox<f64>,
+    }
+
+    impl MockObject {
+        pub fn new(value: f64, normal: na::Vector3<f64>) -> Box<MockObject> {
+            Box::new(MockObject {
+                value: value,
+                normal: normal,
+                bbox: BoundingBox::new(
+                    &na::Point3::new(-1., -1., -100.),
+                    &na::Point3::new(1., 1., 100.),
+                ),
+            })
+        }
+    }
+
+    impl Object<f64> for MockObject {
+        fn approx_value(&self, _: &na::Point3<f64>, _: f64) -> f64 {
+            self.value
+        }
+        fn normal(&self, _: &na::Point3<f64>) -> na::Vector3<f64> {
+            self.normal.clone()
+        }
+        fn bbox(&self) -> &BoundingBox<f64> {
+            &self.bbox
+        }
+    }
+
     #[test]
-    fn empty() {
-        assert!(true);
+    fn simple() {
+        let m = MockObject::new(10.0, na::Vector3::new(1., 0., 0.));
+        let b = Bender::new(m, 4.);
+
+        assert_relative_eq!(b.approx_value(&na::Point3::new(0., 1., 0.), 0.), 10.);
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., 1., 0.)),
+            na::Vector3::new(1., -0.00000000000000024492935982947064, 0.)
+        );
+
+        assert_relative_eq!(b.approx_value(&na::Point3::new(-1., 0., 0.), 0.), 10.);
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(-1., 0., 0.)),
+            na::Vector3::new(0., 1., 0.)
+        );
+
+        assert_relative_eq!(b.approx_value(&na::Point3::new(0., -1., 0.), 0.), 10.);
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., -1., 0.)),
+            na::Vector3::new(-1., 0.00000000000000012246467991473532, 0.)
+        );
+
+        assert_relative_eq!(b.approx_value(&na::Point3::new(1., 0., 0.), 0.), 10.);
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(1., 0., 0.)),
+            na::Vector3::new(0., -1., 0.)
+        );
     }
 }
