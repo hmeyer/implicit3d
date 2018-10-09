@@ -66,7 +66,7 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
         Box::new(Bender {
             object: o,
             width_scaler: w / _2pi,
-            bbox: bbox,
+            bbox,
         })
     }
     fn to_polar(&self, p: &na::Point3<S>) -> na::Point3<S> {
@@ -107,8 +107,8 @@ mod test {
     impl MockObject {
         pub fn new(value: f64, normal: na::Vector3<f64>) -> Box<MockObject> {
             Box::new(MockObject {
-                value: value,
-                normal: normal,
+                value,
+                normal,
                 bbox: BoundingBox::new(
                     &na::Point3::new(-1., -1., -100.),
                     &na::Point3::new(1., 1., 100.),
@@ -122,7 +122,7 @@ mod test {
             self.value
         }
         fn normal(&self, _: &na::Point3<f64>) -> na::Vector3<f64> {
-            self.normal.clone()
+            self.normal
         }
         fn bbox(&self) -> &BoundingBox<f64> {
             &self.bbox
@@ -137,7 +137,7 @@ mod test {
         assert_relative_eq!(b.approx_value(&na::Point3::new(0., 1., 0.), 0.), 10.);
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
-            na::Vector3::new(1., -0.00000000000000024492935982947064, 0.)
+            na::Vector3::new(1., -0.000_000_000_000_000_244_929_359_829_470_64, 0.)
         );
 
         assert_relative_eq!(b.approx_value(&na::Point3::new(-1., 0., 0.), 0.), 10.);
@@ -149,7 +149,7 @@ mod test {
         assert_relative_eq!(b.approx_value(&na::Point3::new(0., -1., 0.), 0.), 10.);
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., -1., 0.)),
-            na::Vector3::new(-1., 0.00000000000000012246467991473532, 0.)
+            na::Vector3::new(-1., 0.000_000_000_000_000_122_464_679_914_735_32, 0.)
         );
 
         assert_relative_eq!(b.approx_value(&na::Point3::new(1., 0., 0.), 0.), 10.);

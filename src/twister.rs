@@ -48,8 +48,8 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         let tan_a = Float::abs(h) / (_2pi * r);
         // The scaler is 1 / sin(a)
         // sin(atan(x)) =   x / sqrt(x^2 + 1)
-        let _1: S = From::from(1f32);
-        let scaler = tan_a / Float::sqrt(tan_a * tan_a + _1);
+        let one: S = From::from(1f32);
+        let scaler = tan_a / Float::sqrt(tan_a * tan_a + one);
 
         let bbox = BoundingBox::<S>::new(
             &na::Point3::new(-r, -r, o.bbox().min.z),
@@ -59,7 +59,7 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
             object: o,
             height_scaler: _2pi / h,
             value_scaler: scaler,
-            bbox: bbox,
+            bbox,
         })
     }
     fn twist_point(&self, p: &na::Point3<S>) -> na::Point3<S> {
@@ -87,11 +87,11 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         let tangential_shear = radius * self.height_scaler;
 
         // Subtract from normal.z.
-        let mut result = normal.clone();
+        let mut result = normal;
         result.z -= tangential_shear * tangential_projection;
 
         // Normalize.
-        return result.normalize();
+        result.normalize()
     }
     fn untwist_normal(&self, v: &na::Vector3<S>, p: &na::Point3<S>) -> na::Vector3<S> {
         let v2 = ::na::Vector2::new(v.x, v.y);
@@ -116,8 +116,8 @@ mod test {
     impl MockObject {
         pub fn new(value: f64, normal: na::Vector3<f64>) -> Box<MockObject> {
             Box::new(MockObject {
-                value: value,
-                normal: normal,
+                value,
+                normal,
                 bbox: BoundingBox::new(
                     &na::Point3::new(-1., -1., -100.),
                     &na::Point3::new(1., 1., 100.),
@@ -131,7 +131,7 @@ mod test {
             self.value
         }
         fn normal(&self, _: &na::Point3<f64>) -> na::Vector3<f64> {
-            self.normal.clone()
+            self.normal
         }
         fn bbox(&self) -> &BoundingBox<f64> {
             &self.bbox
@@ -144,7 +144,7 @@ mod test {
         let t = Twister::new(m, 4.);
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 0.), 0.),
-            4.104846065998354
+            4.104_846_065_998_354
         );
         assert_relative_eq!(
             t.normal(&na::Point3::new(1., 0., 0.)),
@@ -153,16 +153,16 @@ mod test {
 
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 1.), 0.),
-            4.104846065998354
+            4.104_846_065_998_354
         );
         assert_relative_eq!(
             t.normal(&na::Point3::new(1., 0., 1.)),
-            na::Vector3::new(0., -0.5370292721463151, -0.8435636080687686)
+            na::Vector3::new(0., -0.537_029_272_146_315_1, 0.843_563_608_068_768_6)
         );
 
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 2.), 0.),
-            4.104846065998354
+            4.104_846_065_998_354
         );
         assert_relative_eq!(
             t.normal(&na::Point3::new(1., 0., 2.)),
@@ -171,23 +171,23 @@ mod test {
 
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 3.), 0.),
-            4.104846065998354
+            4.104_846_065_998_354
         );
         assert_relative_eq!(
             t.normal(&na::Point3::new(1., 0., 3.)),
-            na::Vector3::new(0., 0.5370292721463151, 0.8435636080687686)
+            na::Vector3::new(0., 0.537_029_272_146_315_1, 0.843_563_608_068_768_6)
         );
 
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 4.), 0.),
-            4.104846065998354
+            4.104_846_065_998_354
         );
         assert_relative_eq!(
             t.normal(&na::Point3::new(1., 0., 4.)),
             na::Vector3::new(
                 1.,
-                0.00000000000000024492935982947064,
-                0.00000000000000038473413874435795
+                0.000_000_000_000_000_244_929_359_829_470_64,
+                0.000_000_000_000_000_384_734_138_744_357_95
             )
         );
     }

@@ -1,9 +1,8 @@
-use {normal_from_object, BoundingBox, Object};
 use alga::general::Real;
 use na;
 use num_traits::Float;
 use std::fmt::Debug;
-
+use {normal_from_object, BoundingBox, Object};
 
 #[derive(Clone, Debug, PartialEq)]
 struct Face<S: Real + Debug> {
@@ -26,16 +25,18 @@ pub struct Mesh<S: Real + Debug> {
 impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
     /// Create a new Mesh from a [STL file](https://en.wikipedia.org/wiki/STL_(file_format)).
     pub fn new(stl_filename: &str) -> ::std::io::Result<Box<Mesh<S>>> {
-        let mut file = ::std::fs::OpenOptions::new().read(true).open(stl_filename)?;
+        let mut file = ::std::fs::OpenOptions::new()
+            .read(true)
+            .open(stl_filename)?;
         let mesh = ::stl_io::read_stl(&mut file)?;
         mesh.validate()?;
-        let vertices = mesh.vertices
+        let vertices = mesh
+            .vertices
             .iter()
-            .map(|v| {
-                na::Vector3::new(From::from(v[0]), From::from(v[1]), From::from(v[2]))
-            })
+            .map(|v| na::Vector3::new(From::from(v[0]), From::from(v[1]), From::from(v[2])))
             .collect::<Vec<_>>();
-        let faces = mesh.faces
+        let faces = mesh
+            .faces
             .iter()
             .map(|f| {
                 let n = (vertices[f.vertices[1]] - vertices[f.vertices[0]])
@@ -45,49 +46,48 @@ impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
                     normal: n,
                     vertices: f.vertices,
                 }
-            })
-            .collect::<Vec<_>>();
+            }).collect::<Vec<_>>();
         let bbox = bbox_for_mesh(&mesh);
         Ok(Box::new(Mesh {
-            bbox: bbox,
-            vertices: vertices,
-            faces: faces,
+            bbox,
+            vertices,
+            faces,
         }))
     }
     fn value(&self, p: &na::Point3<S>) -> S {
         let p = na::Vector3::new(p.x, p.y, p.z);
-        let value_and_acos = self.faces.iter().fold(
-            (Float::max_value(), From::from(0f64)),
-            |min_and_acos, f| {
-                let current_and_acos = distance_point_face(
-                    [
-                        &self.vertices[f.vertices[0]],
-                        &self.vertices[f.vertices[1]],
-                        &self.vertices[f.vertices[2]],
-                    ],
-                    &f.normal,
-                    &p,
-                );
-                if current_and_acos.0.relative_eq(
-                    &min_and_acos.0,
-                    S::default_epsilon(),
-                    S::default_max_relative(),
-                ) {
-                    // current_and_acos.0 == min_and_acos.0
-                    let mut best_acos: S = min_and_acos.1;
-                    if Float::abs(current_and_acos.1) > Float::abs(best_acos) {
-                        best_acos = current_and_acos.1;
+        let value_and_acos =
+            self.faces
+                .iter()
+                .fold((Float::max_value(), From::from(0f64)), |min_and_acos, f| {
+                    let current_and_acos = distance_point_face(
+                        [
+                            &self.vertices[f.vertices[0]],
+                            &self.vertices[f.vertices[1]],
+                            &self.vertices[f.vertices[2]],
+                        ],
+                        &f.normal,
+                        &p,
+                    );
+                    if current_and_acos.0.relative_eq(
+                        &min_and_acos.0,
+                        S::default_epsilon(),
+                        S::default_max_relative(),
+                    ) {
+                        // current_and_acos.0 == min_and_acos.0
+                        let mut best_acos: S = min_and_acos.1;
+                        if Float::abs(current_and_acos.1) > Float::abs(best_acos) {
+                            best_acos = current_and_acos.1;
+                        }
+                        return (min_and_acos.0, best_acos);
                     }
-                    return (min_and_acos.0, best_acos);
-                }
-                if current_and_acos.0 < min_and_acos.0 {
-                    return current_and_acos;
-                } else {
-                    return min_and_acos;
-                }
-            },
-        );
-        return value_and_acos.0 * Float::signum(value_and_acos.1);
+                    if current_and_acos.0 < min_and_acos.0 {
+                        current_and_acos
+                    } else {
+                        min_and_acos
+                    }
+                });
+        value_and_acos.0 * Float::signum(value_and_acos.1)
     }
 }
 
@@ -103,30 +103,30 @@ fn point_over_line<S: Debug + Real + From<f64>>(
     if scale < From::from(0f64) || scale > From::from(1f64) {
         return None;
     }
-    return Some(a + ab * scale);
+    Some(a + ab * scale)
 }
 
 // Project p onto plane of triangle. Return None, if the projection would not fall into the
 // triangle.
 // Triangle is defined via points a,b,c and normal n.
 fn point_over_triangle<S: Debug + Real + Float + From<f64>>(
-    a: &na::Vector3<S>,
-    b: &na::Vector3<S>,
-    c: &na::Vector3<S>,
-    n: &na::Vector3<S>,
-    p: &na::Vector3<S>,
+    triangle_a: &na::Vector3<S>,
+    triangle_b: &na::Vector3<S>,
+    triangle_c: &na::Vector3<S>,
+    normal: &na::Vector3<S>,
+    point: &na::Vector3<S>,
 ) -> Option<na::Vector3<S>> {
-    let _0: S = From::from(0f64);
-    let _1: S = From::from(1f64);
+    let zero: S = From::from(0f64);
+    let one: S = From::from(1f64);
 
-    let proj = p - n * (p - a).dot(n);
+    let proj = point - normal * (point - triangle_a).dot(normal);
 
     // The vector ab and bc span the triangle.
-    let ab = b - a;
-    let bc = c - b;
+    let ab = triangle_b - triangle_a;
+    let bc = triangle_c - triangle_b;
 
     // Vector from a to projected point.
-    let aproj = proj - a;
+    let aproj = proj - triangle_a;
 
     // find linear combination of ab and bc to aproj:
     // aproj = k * ab + l * bc
@@ -134,32 +134,32 @@ fn point_over_triangle<S: Debug + Real + Float + From<f64>>(
     // let l = (aproj.x * ab.y - aproj.y * ab.x) / (bc.x * ab.y - bc.y * ab.x);
     let l;
     let mut ld = bc.x * ab.y - bc.y * ab.x;
-    if ld != _0 {
+    if ld != zero {
         l = (aproj.x * ab.y - aproj.y * ab.x) / ld;
     } else {
         ld = bc.x * ab.z - bc.z * ab.x;
-        if ld != _0 {
+        if ld != zero {
             l = (aproj.x * ab.z - aproj.z * ab.x) / ld;
         } else {
             ld = bc.z * ab.y - bc.y * ab.z;
-            debug_assert!(ld != _0);
+            debug_assert!(ld != zero);
             l = (aproj.z * ab.y - aproj.y * ab.z) / ld;
         }
     }
     let k;
-    if ab.x != _0 {
+    if ab.x != zero {
         k = (aproj.x - l * bc.x) / ab.x;
-    } else if ab.y != _0 {
+    } else if ab.y != zero {
         k = (aproj.y - l * bc.y) / ab.y;
     } else {
         k = (aproj.z - l * bc.z) / ab.z;
     }
 
-    if k < _0 || l < _0 || k > _1 || l > k {
+    if k < zero || l < zero || k > one || l > k {
         return None;
     }
 
-    return Some(proj);
+    Some(proj)
 }
 
 // Assumes that a and b are parallel.
@@ -169,20 +169,20 @@ fn vector_direction<S: Debug + Real + From<f64> + Float>(
     a: &na::Vector3<S>,
     b: &na::Vector3<S>,
 ) -> S {
-    let _0: S = From::from(0f64);
-    let _1: S = From::from(1f64);
+    let zero: S = From::from(0f64);
+    let one: S = From::from(1f64);
     for i in 0..a.len() {
-        if a[i] != _0 {
+        if a[i] != zero {
             if Float::signum(a[i]) == Float::signum(b[i]) {
-                return _1;
+                return one;
             } else {
-                return -_1;
+                return -one;
             }
         }
     }
     // a is a zero-vector the sign direction does not matter. Still return 1, to make sure we have
     // a valid value.
-    return _1;
+    one
 }
 
 // Returns the distance between p and the triangle face (first value).
@@ -198,13 +198,13 @@ fn distance_point_face<S: Debug + Real + From<f64> + Float>(
         return (delta.norm(), vector_direction(&delta, n));
     }
 
-    let _0: S = From::from(0f64);
+    let zero: S = From::from(0f64);
 
     // Iterate over all edges to find any closest projection.
     let mut closest_point_and_dist = [(face[0], face[1]), (face[1], face[2]), (face[2], face[0])]
         .iter()
         .fold(
-            (na::Vector3::new(_0, _0, _0), S::infinity()),
+            (na::Vector3::new(zero, zero, zero), S::infinity()),
             |best_point_and_dist, line| {
                 let optional_point = point_over_line(line.0, line.1, &p);
                 if let Some(ref pp) = optional_point {
@@ -214,7 +214,7 @@ fn distance_point_face<S: Debug + Real + From<f64> + Float>(
                         return (*pp, current_dist);
                     }
                 }
-                return best_point_and_dist;
+                best_point_and_dist
             },
         );
 
@@ -227,16 +227,16 @@ fn distance_point_face<S: Debug + Real + From<f64> + Float>(
                 if current_dist < best_point_and_dist.1 {
                     return (**vertex, current_dist);
                 }
-                return best_point_and_dist;
+                best_point_and_dist
             });
 
     assert!(closest_point_and_dist.1 < S::infinity());
 
     let vector_to_point = p - closest_point_and_dist.0;
-    return (
+    (
         closest_point_and_dist.1,
         vector_to_point.dot(n) / closest_point_and_dist.1,
-    );
+    )
 }
 
 fn bbox_for_mesh<S: Real + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> BoundingBox<S> {
@@ -282,8 +282,8 @@ mod test {
             point_over_line(&o, &d, &na::Vector3::new(-1., 0., 0.)),
             None
         );
-        assert_eq!(point_over_line(&o, &d, &o), Some(o.clone()));
-        assert_eq!(point_over_line(&o, &d, &d), Some(d.clone()));
+        assert_eq!(point_over_line(&o, &d, &o), Some(o));
+        assert_eq!(point_over_line(&o, &d, &d), Some(d));
         assert!(point_over_line(&o, &d, &na::Vector3::new(5., 3., 0.)).is_some());
         assert_eq!(
             point_over_line(&o, &d, &na::Vector3::new(-5., 3., 0.)),
@@ -297,9 +297,9 @@ mod test {
         let b = na::Vector3::new(0., 0., -10.);
         let c = na::Vector3::new(0., 10., 0.);
         let n = na::Vector3::new(-1., 0., 0.);
-        assert_eq!(point_over_triangle(&a, &b, &c, &n, &a), Some(a.clone()));
-        assert_eq!(point_over_triangle(&a, &b, &c, &n, &b), Some(b.clone()));
-        assert_eq!(point_over_triangle(&a, &b, &c, &n, &c), Some(c.clone()));
+        assert_eq!(point_over_triangle(&a, &b, &c, &n, &a), Some(a));
+        assert_eq!(point_over_triangle(&a, &b, &c, &n, &b), Some(b));
+        assert_eq!(point_over_triangle(&a, &b, &c, &n, &c), Some(c));
 
         assert_eq!(
             point_over_triangle(&a, &b, &c, &n, &na::Vector3::new(5., 1., 0.)),
@@ -334,27 +334,27 @@ mod test {
         let c = na::Vector3::new(0., 10., 0.);
         let face = [&a, &b, &c];
         let n = b.cross(&c).normalize();
-        assert_eq!(distance_point_face(face.clone(), &n, &a), (0., 1.));
-        assert_eq!(distance_point_face(face.clone(), &n, &b), (0., 1.));
-        assert_eq!(distance_point_face(face.clone(), &n, &c), (0., 1.));
+        assert_eq!(distance_point_face(face, &n, &a), (0., 1.));
+        assert_eq!(distance_point_face(face, &n, &b), (0., 1.));
+        assert_eq!(distance_point_face(face, &n, &c), (0., 1.));
         assert_eq!(
-            distance_point_face(face.clone(), &n, &na::Vector3::new(-10., 0., 0.)),
+            distance_point_face(face, &n, &na::Vector3::new(-10., 0., 0.)),
             (10., 0.)
         );
         assert_eq!(
-            distance_point_face(face.clone(), &n, &na::Vector3::new(1., 1., 10.)),
+            distance_point_face(face, &n, &na::Vector3::new(1., 1., 10.)),
             (10., 1.)
         );
         assert_eq!(
-            distance_point_face(face.clone(), &n, &na::Vector3::new(1., 1., -10.)),
+            distance_point_face(face, &n, &na::Vector3::new(1., 1., -10.)),
             (10., -1.)
         );
 
-        assert!(distance_point_face(face.clone(), &n, &na::Vector3::new(-1., -1., 10.)).0 > 10.);
-        assert!(distance_point_face(face.clone(), &n, &na::Vector3::new(-1., -1., 10.)).1 > 0.);
+        assert!(distance_point_face(face, &n, &na::Vector3::new(-1., -1., 10.)).0 > 10.);
+        assert!(distance_point_face(face, &n, &na::Vector3::new(-1., -1., 10.)).1 > 0.);
 
-        assert!(distance_point_face(face.clone(), &n, &na::Vector3::new(-1., -1., -10.)).0 > 10.);
-        assert!(distance_point_face(face.clone(), &n, &na::Vector3::new(-1., -1., -10.)).1 < 0.);
+        assert!(distance_point_face(face, &n, &na::Vector3::new(-1., -1., -10.)).0 > 10.);
+        assert!(distance_point_face(face, &n, &na::Vector3::new(-1., -1., -10.)).1 < 0.);
     }
 
     #[test]
@@ -368,11 +368,11 @@ mod test {
         let steps = 100;
         let dist = 100.0;
         for i in 0..steps {
-            let angle = i as f64 * ::std::f64::consts::PI / steps as f64;
+            let angle = f64::from(i) * ::std::f64::consts::PI / f64::from(steps);
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
-            let result = distance_point_face(face.clone(), &n, &p);
+            let result = distance_point_face(face, &n, &p);
             assert_ulps_eq!(result.0, dist);
             assert_ulps_eq!(result.1, angle.cos());
         }
@@ -389,11 +389,11 @@ mod test {
         let steps = 10;
         let dist = 100.0;
         for i in 0..steps {
-            let angle = i as f64 * ::std::f64::consts::PI / steps as f64;
+            let angle = f64::from(i) * ::std::f64::consts::PI / f64::from(steps);
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
-            let result = distance_point_face(face.clone(), &n, &p);
+            let result = distance_point_face(face, &n, &p);
             assert_ulps_eq!(result.0, dist);
             assert_ulps_eq!(result.1, angle.cos());
         }
@@ -433,8 +433,8 @@ mod test {
         ];
         let steps = 10;
         for i in 0..steps {
-            for &(mesh, sign) in [(&convex_mesh, 1.), (&concave_mesh, -1.)].iter() {
-                let x = i as f64 / steps as f64;
+            for &(mesh, sign) in &[(&convex_mesh, 1.), (&concave_mesh, -1.)] {
+                let x = f64::from(i) / f64::from(steps);
 
                 let outside1 = na::Point3::new(x, 0., 0.);
                 let outside2 = na::Point3::new(-x, 0., 0.);
@@ -443,7 +443,6 @@ mod test {
 
                 assert_ulps_eq!(mesh.approx_value(&outside1, 0.), expected_outside_dist);
                 assert_ulps_eq!(mesh.approx_value(&outside2, 0.), expected_outside_dist);
-
 
                 let infront = na::Point3::new(0.5 - x, 1., 0.);
                 let infront_dist = sign * na::Vector3::new(0.5 - x, 1., 0.).norm();
@@ -484,7 +483,7 @@ mod test {
         };
         let steps = 10;
         for i in 0..steps {
-            let x = i as f64 / steps as f64;
+            let x = f64::from(i) / f64::from(steps);
 
             let p1 = na::Point3::new(x, 0., 0.);
             let p2 = na::Point3::new(-x, 0., 0.);
@@ -520,7 +519,7 @@ mod test {
         };
         let steps = 10;
         for i in 0..steps {
-            let x = i as f64 / steps as f64;
+            let x = f64::from(i) / f64::from(steps);
 
             let p1 = na::Point3::new(x, 2. - x, 0.);
             let p2 = na::Point3::new(-x, 2. - x, 0.);

@@ -87,8 +87,8 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
         let d = distance_from_zero;
         let mut p_neg = na::Point3::new(S::neg_infinity(), S::neg_infinity(), S::neg_infinity());
         let mut p_pos = na::Point3::new(S::infinity(), S::infinity(), S::infinity());
-        let _0: S = From::from(0f32);
-        let mut normal = na::Vector3::new(_0, _0, _0);
+        let zero: S = From::from(0f32);
+        let mut normal = na::Vector3::new(zero, zero, zero);
 
         if A::inverted() {
             p_neg[A::value()] = -d;
@@ -101,7 +101,7 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
         Box::new(Plane {
             distance_from_zero: d,
             bbox: BoundingBox::new(&p_neg, &p_pos),
-            normal: normal,
+            normal,
             _phantom: ::std::marker::PhantomData,
         })
     }
@@ -112,16 +112,16 @@ impl<A: 'static + Axis, S: Float + From<f32> + Real> Object<S> for Plane<A, S> {
         let p: S = p[A::value()];
         let ap: S = Float::abs(p);
         if Float::is_sign_positive(p) != A::inverted() {
-            return ap - self.distance_from_zero;
+            ap - self.distance_from_zero
         } else {
-            return -ap - self.distance_from_zero;
+            -ap - self.distance_from_zero
         }
     }
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
     fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
-        return self.normal.clone();
+        self.normal
     }
 }
 
@@ -145,10 +145,10 @@ mod test {
     #[test]
     fn simple() {
         let px = PlaneX::new(10.);
-        assert_eq!(px.approx_value(&na::Point3::new(0., 0., 0.), 0.), -10.);
-        assert_eq!(px.approx_value(&na::Point3::new(10., 0., 0.), 0.), 0.);
-        assert_eq!(px.approx_value(&na::Point3::new(20., 0., 0.), 0.), 10.);
-        assert_eq!(
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(0., 0., 0.), 0.), -10.);
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(10., 0., 0.), 0.), 0.);
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(20., 0., 0.), 0.), 10.);
+        assert_ulps_eq!(
             px.approx_value(&na::Point3::new(20., 1000., 1000.), 0.),
             10.
         );

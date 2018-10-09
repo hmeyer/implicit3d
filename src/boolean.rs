@@ -31,7 +31,7 @@ impl<S: Real + Float + From<f32>> Union<S> {
                 bbox.dilate(r * From::from(0.2f32)); // dilate by some factor of r
                 Some(Box::new(Union {
                     objs: v,
-                    r: r,
+                    r,
                     bbox: bbox.clone(),
                     exact_range: r * From::from(R_MULTIPLIER),
                     fade_range: From::from(FADE_RANGE),
@@ -83,16 +83,16 @@ impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
                 }
             },
         );
-        let _1: S = From::from(1f32);
+        let one: S = From::from(1f32);
         match Float::abs(v0.1 - v1.1) {
             // if they are close together, calc normal from full object
-            diff if diff < (self.exact_range * (_1 - self.fade_range)) => {
+            diff if diff < (self.exact_range * (one - self.fade_range)) => {
                 // else,
                 normal_from_object(self, p)
             }
             diff if diff < self.exact_range => {
-                let fader = (diff / self.exact_range - _1 + self.fade_range) / self.fade_range;
-                (self.objs[v0.0].normal(p) * fader + normal_from_object(self, p) * (_1 - fader))
+                let fader = (diff / self.exact_range - one + self.fade_range) / self.fade_range;
+                (self.objs[v0.0].normal(p) * fader + normal_from_object(self, p) * (one - fader))
                     .normalize()
             }
             // they are far apart, use the min's normal
@@ -125,8 +125,8 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
                     });
                 Some(Box::new(Intersection {
                     objs: v,
-                    r: r,
-                    bbox: bbox,
+                    r,
+                    bbox,
                     exact_range: r * From::from(R_MULTIPLIER),
                     fade_range: From::from(FADE_RANGE),
                 }))
@@ -141,7 +141,7 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
             0 => None,
             1 => Some(v.pop().unwrap()),
             _ => {
-                let neg_rest = Negation::from_vec(v.split_off(1));
+                let neg_rest = Negation::from_vec(&v.split_off(1));
                 v.extend(neg_rest);
                 Intersection::from_vec(v, r)
             }
@@ -191,16 +191,16 @@ impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
                 }
             },
         );
-        let _1: S = From::from(1f32);
+        let one: S = From::from(1f32);
         match Float::abs(v0.1 - v1.1) {
             // if they are close together, calc normal from full object
-            diff if diff < (self.exact_range * (_1 - self.fade_range)) => {
+            diff if diff < (self.exact_range * (one - self.fade_range)) => {
                 // else,
                 normal_from_object(self, p)
             }
             diff if diff < self.exact_range => {
-                let fader = (diff / self.exact_range - _1 + self.fade_range) / self.fade_range;
-                (self.objs[v0.0].normal(p) * fader + normal_from_object(self, p) * (_1 - fader))
+                let fader = (diff / self.exact_range - one + self.fade_range) / self.fade_range;
+                (self.objs[v0.0].normal(p) * fader + normal_from_object(self, p) * (one - fader))
                     .normalize()
             }
             // they are far apart, use the max' normal
@@ -216,7 +216,7 @@ pub struct Negation<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Negation<S> {
-    pub fn from_vec(v: Vec<Box<Object<S>>>) -> Vec<Box<Object<S>>> {
+    pub fn from_vec(v: &[Box<Object<S>>]) -> Vec<Box<Object<S>>> {
         v.iter()
             .map(|o| {
                 Box::new(Negation {
@@ -267,7 +267,7 @@ fn rvmin<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
         .iter()
         .filter(|&x| x < &min_plus_r)
         .fold(From::from(0f32), |sum: S, x| sum + (-*x / r4).exp());
-    return Float::ln(exp_sum) * -r4;
+    Float::ln(exp_sum) * -r4
 }
 
 fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
@@ -296,7 +296,7 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
         .iter()
         .filter(|&x| x > &max_minus_r)
         .fold(From::from(0f32), |sum: S, x| sum + (*x / r4).exp());
-    return Float::ln(exp_sum) * r4;
+    Float::ln(exp_sum) * r4
 }
 
 #[cfg(test)]
@@ -313,8 +313,8 @@ mod test {
     impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
         pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
             Box::new(MockObject {
-                value: value,
-                normal: normal,
+                value,
+                normal,
                 bbox: BoundingBox::infinity(),
             })
         }
@@ -325,7 +325,7 @@ mod test {
             self.value
         }
         fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
-            self.normal.clone()
+            self.normal
         }
         fn bbox(&self) -> &BoundingBox<S> {
             &self.bbox
@@ -337,8 +337,8 @@ mod test {
         let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
         let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
         let union = Union::from_vec(vec![m1, m2], 0.).unwrap();
-        assert_eq!(union.approx_value(&na::Point3::new(0., 0., 0.), 0.), 1.);
-        assert_eq!(
+        assert_ulps_eq!(union.approx_value(&na::Point3::new(0., 0., 0.), 0.), 1.);
+        assert_ulps_eq!(
             union.normal(&na::Point3::new(0., 0., 0.)),
             na::Vector3::new(1., 0., 0.)
         );
@@ -349,8 +349,8 @@ mod test {
         let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
         let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
         let is = Intersection::from_vec(vec![m1, m2], 0.).unwrap();
-        assert_eq!(is.approx_value(&na::Point3::new(0., 0., 0.), 0.), 2.);
-        assert_eq!(
+        assert_ulps_eq!(is.approx_value(&na::Point3::new(0., 0., 0.), 0.), 2.);
+        assert_ulps_eq!(
             is.normal(&na::Point3::new(0., 0., 0.)),
             na::Vector3::new(0., 1., 0.)
         );
@@ -359,9 +359,9 @@ mod test {
     #[test]
     fn negation() {
         let m = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
-        let n = Negation::from_vec(vec![m])[0].clone();
-        assert_eq!(n.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
-        assert_eq!(
+        let n = Negation::from_vec(&[m])[0].clone();
+        assert_ulps_eq!(n.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_ulps_eq!(
             n.normal(&na::Point3::new(0., 0., 0.)),
             na::Vector3::new(-1., 0., 0.)
         );

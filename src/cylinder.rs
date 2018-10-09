@@ -27,9 +27,9 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> 
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
-            let _0: S = From::from(0f32);
-            let pv = na::Vector3::new(p.x, p.y, _0);
-            return pv.norm() - self.radius;
+            let zero: S = From::from(0f32);
+            let pv = na::Vector3::new(p.x, p.y, zero);
+            pv.norm() - self.radius
         } else {
             approx
         }
@@ -38,9 +38,9 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> 
         &self.bbox
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
-        let _0: S = From::from(0f32);
-        let pv = na::Vector3::new(p.x, p.y, _0);
-        return pv.normalize();
+        let zero: S = From::from(0f32);
+        let pv = na::Vector3::new(p.x, p.y, zero);
+        pv.normalize()
     }
 }
 
@@ -57,12 +57,12 @@ pub struct Cone<S: Real> {
 impl<S: Real + Float + From<f32>> Cone<S> {
     /// Create a new infinite Cone (along the Z-Axis) for a given slope and and offset from origin.
     pub fn new(slope: S, offset: S) -> Box<Cone<S>> {
-        let _1: S = From::from(1f32);
+        let one: S = From::from(1f32);
         Box::new(Cone {
-            slope: slope,
-            distance_multiplier: _1 / Float::sqrt(slope * slope + _1), // cos(atan(slope))
-            offset: offset,
-            normal_multiplier: slope / Float::sqrt(slope * slope + _1), // sin(atan(slope))
+            slope,
+            distance_multiplier: one / Float::sqrt(slope * slope + one), // cos(atan(slope))
+            offset,
+            normal_multiplier: slope / Float::sqrt(slope * slope + one), // sin(atan(slope))
             bbox: BoundingBox::infinity(),
         })
     }
@@ -77,18 +77,18 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cone<S> {
     }
     fn approx_value(&self, p: &na::Point3<S>, _: S) -> S {
         let radius = Float::abs(self.slope * (p.z + self.offset));
-        let _0: S = From::from(0f32);
-        let pv = na::Vector3::new(p.x, p.y, _0);
-        return (pv.norm() - radius) * self.distance_multiplier;
+        let zero: S = From::from(0f32);
+        let pv = na::Vector3::new(p.x, p.y, zero);
+        (pv.norm() - radius) * self.distance_multiplier
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
         let s = Float::signum(p.z + self.offset);
-        let _0: S = From::from(0f32);
-        let mut pv = na::Vector3::new(p.x, p.y, _0);
+        let zero: S = From::from(0f32);
+        let mut pv = na::Vector3::new(p.x, p.y, zero);
         pv.normalize_mut();
         pv *= self.distance_multiplier;
         pv.z = -s * self.normal_multiplier;
-        return pv;
+        pv
     }
 }
 
@@ -99,17 +99,17 @@ mod test {
     #[test]
     fn cylinder() {
         let cyl = Cylinder::new(1.0);
-        assert_eq!(cyl.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
-        assert_eq!(cyl.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
-        assert_eq!(cyl.approx_value(&na::Point3::new(0., 1., 0.), 0.), 0.);
-        assert_eq!(cyl.approx_value(&na::Point3::new(0., 10., 0.), 0.), 9.);
-        assert_eq!(cyl.approx_value(&na::Point3::new(0., 10., 1000.), 0.), 9.);
+        assert_ulps_eq!(cyl.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_ulps_eq!(cyl.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
+        assert_ulps_eq!(cyl.approx_value(&na::Point3::new(0., 1., 0.), 0.), 0.);
+        assert_ulps_eq!(cyl.approx_value(&na::Point3::new(0., 10., 0.), 0.), 9.);
+        assert_ulps_eq!(cyl.approx_value(&na::Point3::new(0., 10., 1000.), 0.), 9.);
     }
 
     #[test]
     fn cone() {
         let c = Cone::new(2., 10.);
-        assert_eq!(c.approx_value(&na::Point3::new(0., 0., -10.), 0.), 0.);
-        assert_eq!(c.approx_value(&na::Point3::new(2., 0., -11.), 0.), 0.);
+        assert_ulps_eq!(c.approx_value(&na::Point3::new(0., 0., -10.), 0.), 0.);
+        assert_ulps_eq!(c.approx_value(&na::Point3::new(2., 0., -11.), 0.), 0.);
     }
 }

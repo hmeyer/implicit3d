@@ -6,24 +6,23 @@ extern crate nalgebra;
 extern crate num_traits;
 use alga::general::Real;
 use bencher::Bencher;
-use implicit3d::{Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ,
-                 Sphere, Twister};
+use implicit3d::{
+    Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, Sphere, Twister,
+};
 use nalgebra as na;
 use num_traits::{Float, FloatConst};
 use std::fmt::Debug;
 
-
 const STEPS: usize = 50;
 
-
 fn evaluate<S: From<f32> + Debug + Float + Real>(obj: &Object<S>) -> S {
-    let _0 = From::from(0f32);
-    let mut p = na::Point3::new(_0, _0, obj.bbox().min.z);
+    let zero = From::from(0f32);
+    let mut p = na::Point3::new(zero, zero, obj.bbox().min.z);
     let xd = (obj.bbox().max.x - obj.bbox().min.x) / From::from(STEPS as f32);
     let yd = (obj.bbox().max.y - obj.bbox().min.y) / From::from(STEPS as f32);
     let zd = (obj.bbox().max.z - obj.bbox().min.z) / From::from(STEPS as f32);
     let slack = Float::min(xd, Float::min(yd, zd)) / From::from(10f32);
-    let mut result = _0;
+    let mut result = zero;
     for _ in 0..STEPS {
         p.y = obj.bbox().min.y;
         for _ in 0..STEPS {
@@ -36,16 +35,16 @@ fn evaluate<S: From<f32> + Debug + Float + Real>(obj: &Object<S>) -> S {
         }
         p.z += zd;
     }
-    return result;
+    result
 }
 
 fn normals<S: 'static + From<f32> + Debug + Float + Real>(obj: &Object<S>) -> na::Vector3<S> {
-    let _0 = From::from(0f32);
-    let mut p = na::Point3::new(_0, _0, obj.bbox().min.z);
+    let zero = From::from(0f32);
+    let mut p = na::Point3::new(zero, zero, obj.bbox().min.z);
     let xd = (obj.bbox().max.x - obj.bbox().min.x) / From::from(STEPS as f32);
     let yd = (obj.bbox().max.y - obj.bbox().min.y) / From::from(STEPS as f32);
     let zd = (obj.bbox().max.z - obj.bbox().min.z) / From::from(STEPS as f32);
-    let mut result = na::Vector3::new(_0, _0, _0);
+    let mut result = na::Vector3::new(zero, zero, zero);
     for _ in 0..STEPS {
         p.y = obj.bbox().min.y;
         for _ in 0..STEPS {
@@ -58,7 +57,7 @@ fn normals<S: 'static + From<f32> + Debug + Float + Real>(obj: &Object<S>) -> na
         }
         p.z += zd;
     }
-    return result;
+    result
 }
 
 fn sphere<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
@@ -71,18 +70,18 @@ fn sphere_normals<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
 }
 
 fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
-    let _0 = From::from(0f32);
-    let _05 = From::from(0.5f32);
+    let zero = From::from(0f32);
+    let point_five = From::from(0.5f32);
     Intersection::from_vec(
         vec![
-            PlaneX::new(_05),
-            PlaneNegX::new(_05),
-            PlaneY::new(_05),
-            PlaneNegY::new(_05),
-            PlaneZ::new(_05),
-            PlaneNegZ::new(_05),
+            PlaneX::new(point_five),
+            PlaneNegX::new(point_five),
+            PlaneY::new(point_five),
+            PlaneNegY::new(point_five),
+            PlaneZ::new(point_five),
+            PlaneNegZ::new(point_five),
         ],
-        _0,
+        zero,
     ).unwrap() as Box<Object<S>>
 }
 

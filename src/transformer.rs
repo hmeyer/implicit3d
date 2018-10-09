@@ -1,9 +1,8 @@
-use {BoundingBox, Object, PrimitiveParameters};
 use alga::general::Real;
 use alga::linear::Transformation;
 use na;
 use num_traits::Float;
-
+use {BoundingBox, Object, PrimitiveParameters};
 
 #[derive(Clone, Debug)]
 /// AffineTransformer is a primitive that takes an object as input and allows to modify it using
@@ -48,9 +47,12 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
         AffineTransformer::new_with_scaler(self.object.clone(), new_trans, self.scale_min)
     }
     fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
-        let _1: S = From::from(1f32);
-        let new_trans = self.transform
-            .append_nonuniform_scaling(&na::Vector3::new(_1 / s.x, _1 / s.y, _1 / s.z));
+        let one: S = From::from(1f32);
+        let new_trans = self.transform.append_nonuniform_scaling(&na::Vector3::new(
+            one / s.x,
+            one / s.y,
+            one / s.z,
+        ));
         AffineTransformer::new_with_scaler(
             self.object.clone(),
             new_trans,
@@ -64,8 +66,8 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
         AffineTransformer::new(o, na::Matrix4::identity())
     }
     fn new(o: Box<Object<S>>, t: na::Matrix4<S>) -> Box<AffineTransformer<S>> {
-        let _1: S = From::from(1f32);
-        AffineTransformer::new_with_scaler(o, t, _1)
+        let one: S = From::from(1f32);
+        AffineTransformer::new_with_scaler(o, t, one)
     }
     fn new_with_scaler(
         o: Box<Object<S>>,
@@ -85,8 +87,8 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
                 Box::new(AffineTransformer {
                     object: o,
                     transform: t,
-                    scale_min: scale_min,
-                    bbox: bbox,
+                    scale_min,
+                    bbox,
                 })
             }
         }
@@ -105,7 +107,6 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -120,8 +121,8 @@ mod test {
     impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
         pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
             Box::new(MockObject {
-                value: value,
-                normal: normal,
+                value,
+                normal,
                 bbox: BoundingBox::infinity(),
             })
         }
@@ -132,7 +133,7 @@ mod test {
             self.value
         }
         fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
-            self.normal.clone()
+            self.normal
         }
         fn bbox(&self) -> &BoundingBox<S> {
             &self.bbox

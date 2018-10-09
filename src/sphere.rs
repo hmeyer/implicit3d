@@ -24,7 +24,7 @@ impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
-            return na::Vector3::new(p.x, p.y, p.z).norm() - self.radius;
+            na::Vector3::new(p.x, p.y, p.z).norm() - self.radius
         } else {
             approx
         }
@@ -33,7 +33,7 @@ impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
         &self.bbox
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
-        return na::Vector3::new(p.x, p.y, p.z).normalize();
+        na::Vector3::new(p.x, p.y, p.z).normalize()
     }
 }
 
@@ -44,8 +44,8 @@ mod test {
     #[test]
     fn simple() {
         let s = Sphere::new(1.);
-        assert_eq!(s.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
-        assert_eq!(s.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
-        assert_eq!(s.approx_value(&na::Point3::new(2., 0., 0.), 0.), 1.);
+        assert_ulps_eq!(s.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_ulps_eq!(s.approx_value(&na::Point3::new(1., 0., 0.), 0.), 0.);
+        assert_ulps_eq!(s.approx_value(&na::Point3::new(2., 0., 0.), 0.), 1.);
     }
 }
