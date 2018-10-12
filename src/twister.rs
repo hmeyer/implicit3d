@@ -155,7 +155,7 @@ mod test {
             t.approx_value(&na::Point3::new(0., 0., 1.), 0.),
             4.104_846_065_998_354
         );
-        assert_relative_eq!(
+        ulps_eq!(
             t.normal(&na::Point3::new(1., 0., 1.)),
             na::Vector3::new(0., -0.537_029_272_146_315_1, 0.843_563_608_068_768_6)
         );
