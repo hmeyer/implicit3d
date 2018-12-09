@@ -81,6 +81,7 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
         let width_for_one_full_rotation = self.width_scaler * _2pi;
         let scale_along_x = circumference / width_for_one_full_rotation;
         normal.x /= scale_along_x;
+        normal.z = -normal.z;
         normal.normalize()
     }
     fn bend_normal(&self, v: na::Vector3<S>, polar_p: na::Point3<S>) -> na::Vector3<S> {
