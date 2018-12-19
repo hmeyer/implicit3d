@@ -11,6 +11,7 @@ use {BoundingBox, Object, PrimitiveParameters};
 pub struct AffineTransformer<S: Real> {
     object: Box<Object<S>>,
     transform: na::Matrix4<S>,
+    transposed3x3: na::Matrix3<S>,
     scale_min: S,
     bbox: BoundingBox<S>,
 }
@@ -33,9 +34,10 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
         self.object.set_parameters(p);
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
-        self.transform
-            .transform_vector(&self.object.normal(&self.transform.transform_point(&p)))
-            .normalize()
+        let normal_at_p: na::Vector3<S> = self.object.normal(&self.transform.transform_point(&p));
+
+        let result = self.transposed3x3 * normal_at_p;
+        result.normalize()
     }
     fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
         let new_trans = self.transform.append_translation(&-v);
@@ -84,9 +86,13 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
             None => panic!("Failed to invert {:?}", t),
             Some(t_inv) => {
                 let bbox = o.bbox().transform(&t_inv);
+                let transposed3x3 = t
+                    .fixed_slice::<::na::core::dimension::U3, ::na::core::dimension::U3>(0, 0)
+                    .transpose();
                 Box::new(AffineTransformer {
                     object: o,
                     transform: t,
+                    transposed3x3,
                     scale_min,
                     bbox,
                 })
@@ -110,20 +116,27 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::sync::mpsc::{sync_channel, SyncSender};
 
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug)]
     pub struct MockObject<S: Real> {
         value: S,
         normal: na::Vector3<S>,
         bbox: BoundingBox<S>,
+        normal_call_sender: SyncSender<na::Point3<S>>,
     }
 
     impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
-        pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
+        pub fn new(
+            value: S,
+            normal: na::Vector3<S>,
+            normal_call_sender: SyncSender<na::Point3<S>>,
+        ) -> Box<MockObject<S>> {
             Box::new(MockObject {
                 value,
                 normal,
                 bbox: BoundingBox::infinity(),
+                normal_call_sender,
             })
         }
     }
@@ -132,7 +145,8 @@ mod test {
         fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
             self.value
         }
-        fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
+        fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
+            self.normal_call_sender.send(*p).unwrap();
             self.normal
         }
         fn bbox(&self) -> &BoundingBox<S> {
@@ -142,9 +156,32 @@ mod test {
 
     #[test]
     fn translate() {
-        let mock_object = MockObject::new(1.0, na::Vector3::new(1.0, 0.0, 0.0));
-        let translated = mock_object.translate(&na::Vector3::new(0.0001, 0.0, 0.0));
+        let (sender, receiver) = sync_channel(1);
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mock_object = MockObject::new(1.0, normal, sender);
+        let translation = na::Vector3::new(0.0001, 0.0, 0.0);
+        let translated = mock_object.translate(&translation);
         let p = na::Point3::new(1.0, 0.0, 0.0);
-        assert_eq!(mock_object.normal(&p), translated.normal(&p));
+        assert_eq!(translated.normal(&p), normal);
+        assert_eq!(receiver.recv().unwrap(), p - translation);
+    }
+
+    #[test]
+    fn rotate() {
+        let (sender, receiver) = sync_channel(1);
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mock_object = MockObject::new(1.0, normal, sender);
+        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 6.0);
+        let rotated = mock_object.rotate(&rotation);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+
+        assert_relative_eq!(
+            rotated.normal(&p),
+            na::Vector3::new(num_traits::Float::sqrt(3.0) / 2.0, -0.5, 0.0)
+        );
+        assert_relative_eq!(
+            receiver.try_recv().unwrap(),
+            na::Point3::new(num_traits::Float::sqrt(3.0) / 2.0, 0.5, 0.0)
+        );
     }
 }
