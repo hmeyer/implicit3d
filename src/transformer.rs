@@ -34,10 +34,9 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
         self.object.set_parameters(p);
     }
     fn normal(&self, p: &na::Point3<S>) -> na::Vector3<S> {
-        let normal_at_p: na::Vector3<S> = self.object.normal(&self.transform.transform_point(&p));
-
-        let result = self.transposed3x3 * normal_at_p;
-        result.normalize()
+        let normal_at_p = self.object.normal(&self.transform.transform_point(&p));
+        let transformed_normal = self.transposed3x3 * normal_at_p;
+        transformed_normal.normalize()
     }
     fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
         let new_trans = self.transform.append_translation(&-v);
