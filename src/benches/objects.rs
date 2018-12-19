@@ -82,7 +82,8 @@ fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
             PlaneNegZ::new(point_five),
         ],
         zero,
-    ).unwrap() as Box<Object<S>>
+    )
+    .unwrap() as Box<Object<S>>
 }
 
 fn cube<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
@@ -98,7 +99,8 @@ fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>() -> Box
     Intersection::difference_from_vec(
         vec![create_cube(), Sphere::new(From::from(0.5f32))],
         From::from(0.2f32),
-    ).unwrap() as Box<Object<S>>
+    )
+    .unwrap() as Box<Object<S>>
 }
 
 fn hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {

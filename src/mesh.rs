@@ -46,7 +46,8 @@ impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
                     normal: n,
                     vertices: f.vertices,
                 }
-            }).collect::<Vec<_>>();
+            })
+            .collect::<Vec<_>>();
         let bbox = bbox_for_mesh(&mesh);
         Ok(Box::new(Mesh {
             bbox,

@@ -223,7 +223,8 @@ impl<S: Real + Float + From<f32>> Negation<S> {
                     object: o.clone(),
                     infinity_bbox: BoundingBox::<S>::infinity(),
                 }) as Box<Object<S>>
-            }).collect()
+            })
+            .collect()
     }
 }
 
