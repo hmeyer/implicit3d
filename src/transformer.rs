@@ -116,13 +116,12 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
 mod test {
     use super::super::test::MockObject;
     use super::*;
-    use std::sync::mpsc::sync_channel;
 
     #[test]
     fn translate() {
-        let (sender, receiver) = sync_channel(1);
         let normal = na::Vector3::new(1.0, 0.0, 0.0);
-        let mock_object = MockObject::new(1.0, normal, sender);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
         let translation = na::Vector3::new(0.0001, 0.0, 0.0);
         let translated = mock_object.translate(&translation);
         let p = na::Point3::new(1.0, 0.0, 0.0);
@@ -132,9 +131,9 @@ mod test {
 
     #[test]
     fn rotate() {
-        let (sender, receiver) = sync_channel(1);
         let normal = na::Vector3::new(1.0, 0.0, 0.0);
-        let mock_object = MockObject::new(1.0, normal, sender);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
         let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 6.0);
         let rotated = mock_object.rotate(&rotation);
         let p = na::Point3::new(1.0, 0.0, 0.0);
