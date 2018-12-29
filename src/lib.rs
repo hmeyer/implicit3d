@@ -67,6 +67,9 @@ pub use self::plane::{PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ};
 mod mesh;
 pub use self::mesh::Mesh;
 
+#[cfg(test)]
+mod test;
+
 /// This struct configures evaluation of rounded edges between object.
 /// The edge is evaluated in a different more computationally expensive way.
 pub struct PrimitiveParameters<S> {
