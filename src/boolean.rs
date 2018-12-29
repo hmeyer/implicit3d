@@ -302,8 +302,8 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use super::super::test::MockObject;
+    use super::*;
 
     #[test]
     fn union() {

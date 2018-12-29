@@ -96,9 +96,8 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use super::super::test::MockObject;
-
+    use super::*;
 
     #[test]
     fn simple() {

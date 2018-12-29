@@ -3,9 +3,7 @@ use alga::general::Real;
 use bbox::BoundingBox;
 use na;
 use num_traits::Float;
-use std::sync::mpsc::{sync_channel, SyncSender, Receiver};
-
-
+use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 
 #[derive(Clone, Debug)]
 pub struct MockObject<S: Real> {
@@ -16,10 +14,7 @@ pub struct MockObject<S: Real> {
 }
 
 impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
-    pub fn new(
-        value: S,
-        normal: na::Vector3<S>,
-    ) -> Box<MockObject<S>> {
+    pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
         Self::new_with_bbox(value, normal, BoundingBox::infinity())
     }
     pub fn new_with_bbox(
@@ -31,10 +26,10 @@ impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
             value,
             normal,
             bbox,
-            normal_call_sender:None,
+            normal_call_sender: None,
         })
     }
-    pub fn add_normal_call_recorder(&mut self, buffer_size : usize ) -> Receiver<na::Point3<S>> {
+    pub fn add_normal_call_recorder(&mut self, buffer_size: usize) -> Receiver<na::Point3<S>> {
         let (sender, receiver) = sync_channel(buffer_size);
         self.normal_call_sender = Some(sender);
         receiver
