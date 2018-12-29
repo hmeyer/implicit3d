@@ -97,38 +97,8 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use super::super::test::MockObject;
 
-    #[derive(Clone, Debug, PartialEq)]
-    pub struct MockObject {
-        value: f64,
-        normal: na::Vector3<f64>,
-        bbox: BoundingBox<f64>,
-    }
-
-    impl MockObject {
-        pub fn new(value: f64, normal: na::Vector3<f64>) -> Box<MockObject> {
-            Box::new(MockObject {
-                value,
-                normal,
-                bbox: BoundingBox::new(
-                    &na::Point3::new(-1., -1., -100.),
-                    &na::Point3::new(1., 1., 100.),
-                ),
-            })
-        }
-    }
-
-    impl Object<f64> for MockObject {
-        fn approx_value(&self, _: &na::Point3<f64>, _: f64) -> f64 {
-            self.value
-        }
-        fn normal(&self, _: &na::Point3<f64>) -> na::Vector3<f64> {
-            self.normal
-        }
-        fn bbox(&self) -> &BoundingBox<f64> {
-            &self.bbox
-        }
-    }
 
     #[test]
     fn simple() {

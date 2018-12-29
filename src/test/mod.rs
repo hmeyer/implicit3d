@@ -20,10 +20,17 @@ impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
         value: S,
         normal: na::Vector3<S>,
     ) -> Box<MockObject<S>> {
+        Self::new_with_bbox(value, normal, BoundingBox::infinity())
+    }
+    pub fn new_with_bbox(
+        value: S,
+        normal: na::Vector3<S>,
+        bbox: BoundingBox<S>,
+    ) -> Box<MockObject<S>> {
         Box::new(MockObject {
             value,
             normal,
-            bbox: BoundingBox::infinity(),
+            bbox,
             normal_call_sender:None,
         })
     }
