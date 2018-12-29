@@ -81,13 +81,12 @@ impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
         let width_for_one_full_rotation = self.width_scaler * _2pi;
         let scale_along_x = circumference / width_for_one_full_rotation;
         normal.x /= scale_along_x;
-        normal.z = -normal.z;
         normal.normalize()
     }
     fn bend_normal(&self, v: na::Vector3<S>, polar_p: na::Point3<S>) -> na::Vector3<S> {
         let v = self.tilt_normal(v, polar_p);
-        let phi = polar_p.x + S::PI();
-        let v2 = ::na::Vector2::new(v.x, v.y);
+        let phi = polar_p.x;
+        let v2 = ::na::Vector2::new(v.x, -v.y);
         let trans = ::na::Rotation2::new(phi);
         let rv2 = trans.rotate_vector(&v2);
         na::Vector3::new(rv2.x, rv2.y, v.z)
@@ -100,32 +99,89 @@ mod test {
     use super::*;
 
     #[test]
-    fn simple() {
+    fn values_in_quadrants() {
         let m = MockObject::new(10.0, na::Vector3::new(1., 0., 0.));
         let b = Bender::new(m, 4.);
 
         assert_relative_eq!(b.approx_value(&na::Point3::new(0., 1., 0.), 0.), 10.);
+        assert_relative_eq!(b.approx_value(&na::Point3::new(-1., 0., 0.), 0.), 10.);
+        assert_relative_eq!(b.approx_value(&na::Point3::new(0., -1., 0.), 0.), 10.);
+        assert_relative_eq!(b.approx_value(&na::Point3::new(1., 0., 0.), 0.), 10.);
+    }
+    #[test]
+    fn normal_x_in_quadrants() {
+        let m = MockObject::new(10.0, na::Vector3::new(1., 0., 0.));
+        let b = Bender::new(m, 4.);
+
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
-            na::Vector3::new(1., -0.000_000_000_000_000_244_929_359_829_470_64, 0.)
+            na::Vector3::new(-1., 0.000_000_000_000_000_244_929_359_829_470_64, 0.)
         );
 
-        assert_relative_eq!(b.approx_value(&na::Point3::new(-1., 0., 0.), 0.), 10.);
         assert_relative_eq!(
             b.normal(&na::Point3::new(-1., 0., 0.)),
-            na::Vector3::new(0., 1., 0.)
-        );
-
-        assert_relative_eq!(b.approx_value(&na::Point3::new(0., -1., 0.), 0.), 10.);
-        assert_relative_eq!(
-            b.normal(&na::Point3::new(0., -1., 0.)),
-            na::Vector3::new(-1., 0.000_000_000_000_000_122_464_679_914_735_32, 0.)
-        );
-
-        assert_relative_eq!(b.approx_value(&na::Point3::new(1., 0., 0.), 0.), 10.);
-        assert_relative_eq!(
-            b.normal(&na::Point3::new(1., 0., 0.)),
             na::Vector3::new(0., -1., 0.)
         );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., -1., 0.)),
+            na::Vector3::new(1., 0.000_000_000_000_000_122_464_679_914_735_32, 0.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(1., 0., 0.)),
+            na::Vector3::new(0., 1., 0.)
+        );
     }
+    #[test]
+    fn normal_y_in_quadrants() {
+        let m = MockObject::new(10.0, na::Vector3::new(0., 1., 0.));
+        let b = Bender::new(m, 4.);
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., 1., 0.)),
+            na::Vector3::new(0.00000000000000012246467991473532, 1., 0.0)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(-1., 0., 0.)),
+            na::Vector3::new(-1., 0., 0.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., -1., 0.)),
+            na::Vector3::new(0., -1., 0.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(1., 0., 0.)),
+            na::Vector3::new(1., -0.00000000000000018369701987210297, 0.)
+        );
+    }
+    #[test]
+    fn normal_z_in_quadrants() {
+        let m = MockObject::new(10.0, na::Vector3::new(0., 0., 1.));
+        let b = Bender::new(m, 4.);
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., 1., 0.)),
+            na::Vector3::new(0., 0., 1.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(-1., 0., 0.)),
+            na::Vector3::new(0., 0., 1.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(0., -1., 0.)),
+            na::Vector3::new(0., 0., 1.)
+        );
+
+        assert_relative_eq!(
+            b.normal(&na::Point3::new(1., 0., 0.)),
+            na::Vector3::new(0., 0., 1.)
+        );
+    }
+
 }
