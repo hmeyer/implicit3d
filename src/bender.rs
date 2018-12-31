@@ -115,7 +115,7 @@ mod test {
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
-            na::Vector3::new(-1., 0.000_000_000_000_000_244_929_359_829_470_64, 0.)
+            na::Vector3::new(-1., 0.000_000_000_000_000_244_929_359_829_470_64_f64, 0.)
         );
 
         assert_relative_eq!(
@@ -125,7 +125,7 @@ mod test {
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., -1., 0.)),
-            na::Vector3::new(1., 0.000_000_000_000_000_122_464_679_914_735_32, 0.)
+            na::Vector3::new(1., 0.000_000_000_000_000_122_464_679_914_735_32_f64, 0.)
         );
 
         assert_relative_eq!(
@@ -140,7 +140,7 @@ mod test {
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
-            na::Vector3::new(0.000_000_000_000_000_122_464_679_914_735_32, 1., 0.0)
+            na::Vector3::new(0.000_000_000_000_000_122_464_679_914_735_32_f64, 1., 0.0)
         );
 
         assert_relative_eq!(
