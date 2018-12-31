@@ -38,12 +38,20 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
     }
     fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
         let new_trans = self.transform.append_translation(&-v);
-        Box::new(AffineTransformer::new_with_scaler(self.object.clone(), new_trans, self.scale_min))
+        Box::new(AffineTransformer::new_with_scaler(
+            self.object.clone(),
+            new_trans,
+            self.scale_min,
+        ))
     }
     fn rotate(&self, r: &na::Vector3<S>) -> Box<Object<S>> {
         let euler = ::na::Rotation::from_euler_angles(r.x, r.y, r.z).to_homogeneous();
         let new_trans = self.transform * euler;
-        Box::new(AffineTransformer::new_with_scaler(self.object.clone(), new_trans, self.scale_min))
+        Box::new(AffineTransformer::new_with_scaler(
+            self.object.clone(),
+            new_trans,
+            self.scale_min,
+        ))
     }
     fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
         let one: S = From::from(1f32);
@@ -68,11 +76,7 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
         let one: S = From::from(1f32);
         AffineTransformer::new_with_scaler(o, t, one)
     }
-    fn new_with_scaler(
-        o: Box<Object<S>>,
-        t: na::Matrix4<S>,
-        scale_min: S,
-    ) -> Self {
+    fn new_with_scaler(o: Box<Object<S>>, t: na::Matrix4<S>, scale_min: S) -> Self {
         // TODO: Calculate scale_min from t.
         // This should be something similar to
         // 1./Vector::new(t.x.x, t.y.x, t.z.x).magnitude().min(

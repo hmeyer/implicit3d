@@ -217,16 +217,14 @@ pub struct Negation<S: Real> {
 
 impl<S: Real + Float + From<f32>> Negation<S> {
     pub fn new(o: Box<Object<S>>) -> Self {
-    Negation {
-                    object: o,
-                    infinity_bbox: BoundingBox::<S>::infinity(),
-                }
+        Negation {
+            object: o,
+            infinity_bbox: BoundingBox::<S>::infinity(),
+        }
     }
     pub fn from_vec(v: &[Box<Object<S>>]) -> Vec<Box<Object<S>>> {
         v.iter()
-            .map(|o| {
-                Box::new(Negation::new(o.clone())) as Box<Object<S>>
-            })
+            .map(|o| Box::new(Negation::new(o.clone())) as Box<Object<S>>)
             .collect()
     }
 }

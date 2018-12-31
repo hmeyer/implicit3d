@@ -17,11 +17,7 @@ impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
     pub fn new(value: S, normal: na::Vector3<S>) -> Self {
         Self::new_with_bbox(value, normal, BoundingBox::infinity())
     }
-    pub fn new_with_bbox(
-        value: S,
-        normal: na::Vector3<S>,
-        bbox: BoundingBox<S>,
-    ) -> Self {
+    pub fn new_with_bbox(value: S, normal: na::Vector3<S>, bbox: BoundingBox<S>) -> Self {
         MockObject {
             value,
             normal,
