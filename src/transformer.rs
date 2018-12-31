@@ -1,6 +1,4 @@
 use alga::general::Real;
-use alga::linear::Transformation;
-use na;
 use num_traits::Float;
 use {BoundingBox, Object, PrimitiveParameters};
 
