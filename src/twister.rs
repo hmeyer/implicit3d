@@ -38,7 +38,7 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twist
 impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
     /// Create a twisted version ob o.
     /// o: Object to be twisted, h: height for one full rotation
-    pub fn new(o: Box<Object<S>>, h: S) -> Box<Twister<S>> {
+    pub fn new(o: Box<Object<S>>, h: S) -> Self {
         let _2pi: S = S::PI() * From::from(2.);
         let mx = Float::max(Float::abs(o.bbox().min.x), Float::abs(o.bbox().max.x));
         let my = Float::max(Float::abs(o.bbox().min.y), Float::abs(o.bbox().max.y));
@@ -55,12 +55,12 @@ impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
             &na::Point3::new(-r, -r, o.bbox().min.z),
             &na::Point3::new(r, r, o.bbox().max.z),
         );
-        Box::new(Twister {
+        Twister {
             object: o,
             height_scaler: _2pi / h,
             value_scaler: scaler,
             bbox,
-        })
+        }
     }
     fn twist_point(&self, p: &na::Point3<S>) -> na::Point3<S> {
         let p2 = ::na::Point2::new(p.x, p.y);
@@ -117,7 +117,7 @@ mod test {
                 &na::Point3::new(1., 1., 100.),
             ),
         );
-        let t = Twister::new(m, 4.);
+        let t = Twister::new(Box::new(m), 4.);
         assert_relative_eq!(
             t.approx_value(&na::Point3::new(0., 0., 0.), 0.),
             4.104_846_065_998_354

@@ -216,13 +216,16 @@ pub struct Negation<S: Real> {
 }
 
 impl<S: Real + Float + From<f32>> Negation<S> {
+    pub fn new(o: Box<Object<S>>) -> Self {
+    Negation {
+                    object: o,
+                    infinity_bbox: BoundingBox::<S>::infinity(),
+                }
+    }
     pub fn from_vec(v: &[Box<Object<S>>]) -> Vec<Box<Object<S>>> {
         v.iter()
             .map(|o| {
-                Box::new(Negation {
-                    object: o.clone(),
-                    infinity_bbox: BoundingBox::<S>::infinity(),
-                }) as Box<Object<S>>
+                Box::new(Negation::new(o.clone())) as Box<Object<S>>
             })
             .collect()
     }
@@ -309,7 +312,7 @@ mod test {
     fn union() {
         let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
         let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
-        let union = Union::from_vec(vec![m1, m2], 0.).unwrap();
+        let union = Union::from_vec(vec![Box::new(m1), Box::new(m2)], 0.).unwrap();
         assert_ulps_eq!(union.approx_value(&na::Point3::new(0., 0., 0.), 0.), 1.);
         assert_ulps_eq!(
             union.normal(&na::Point3::new(0., 0., 0.)),
@@ -321,7 +324,7 @@ mod test {
     fn intersection() {
         let m1 = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
         let m2 = MockObject::new(2.0, na::Vector3::new(0., 1., 0.));
-        let is = Intersection::from_vec(vec![m1, m2], 0.).unwrap();
+        let is = Intersection::from_vec(vec![Box::new(m1), Box::new(m2)], 0.).unwrap();
         assert_ulps_eq!(is.approx_value(&na::Point3::new(0., 0., 0.), 0.), 2.);
         assert_ulps_eq!(
             is.normal(&na::Point3::new(0., 0., 0.)),
@@ -332,7 +335,7 @@ mod test {
     #[test]
     fn negation() {
         let m = MockObject::new(1.0, na::Vector3::new(1., 0., 0.));
-        let n = Negation::from_vec(&[m])[0].clone();
+        let n = Negation::from_vec(&[Box::new(m)])[0].clone();
         assert_ulps_eq!(n.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
         assert_ulps_eq!(
             n.normal(&na::Point3::new(0., 0., 0.)),

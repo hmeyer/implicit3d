@@ -83,7 +83,7 @@ pub struct Plane<A: Axis, S: Real> {
 }
 
 impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
-    pub fn new(distance_from_zero: S) -> Box<Plane<A, S>> {
+    pub fn new(distance_from_zero: S) -> Self {
         let d = distance_from_zero;
         let mut p_neg = na::Point3::new(S::neg_infinity(), S::neg_infinity(), S::neg_infinity());
         let mut p_pos = na::Point3::new(S::infinity(), S::infinity(), S::infinity());
@@ -98,12 +98,12 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
             normal[A::value()] = From::from(1.);
         }
 
-        Box::new(Plane {
+        Plane {
             distance_from_zero: d,
             bbox: BoundingBox::new(&p_neg, &p_pos),
             normal,
             _phantom: ::std::marker::PhantomData,
-        })
+        }
     }
 }
 

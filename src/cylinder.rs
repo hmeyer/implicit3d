@@ -12,14 +12,14 @@ pub struct Cylinder<S: Real> {
 
 impl<S: Real + Float> Cylinder<S> {
     /// Create a new infinite Cylinder (along the Z-Axis) of radius r.
-    pub fn new(r: S) -> Box<Cylinder<S>> {
-        Box::new(Cylinder {
+    pub fn new(r: S) -> Self {
+        Cylinder {
             radius: r,
             bbox: BoundingBox::new(
                 &na::Point3::new(-r, -r, S::neg_infinity()),
                 &na::Point3::new(r, r, S::infinity()),
             ),
-        })
+        }
     }
 }
 
@@ -56,15 +56,15 @@ pub struct Cone<S: Real> {
 
 impl<S: Real + Float + From<f32>> Cone<S> {
     /// Create a new infinite Cone (along the Z-Axis) for a given slope and and offset from origin.
-    pub fn new(slope: S, offset: S) -> Box<Cone<S>> {
+    pub fn new(slope: S, offset: S) -> Self {
         let one: S = From::from(1f32);
-        Box::new(Cone {
+        Cone {
             slope,
             distance_multiplier: one / Float::sqrt(slope * slope + one), // cos(atan(slope))
             offset,
             normal_multiplier: slope / Float::sqrt(slope * slope + one), // sin(atan(slope))
             bbox: BoundingBox::infinity(),
-        })
+        }
     }
 }
 

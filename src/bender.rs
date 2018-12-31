@@ -57,17 +57,17 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bende
 impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
     /// Create a new bent object.
     /// o: Object to be bent, w: width (x) for one full rotation
-    pub fn new(o: Box<Object<S>>, w: S) -> Box<Bender<S>> {
+    pub fn new(o: Box<Object<S>>, w: S) -> Self {
         let bbox = BoundingBox::new(
             &na::Point3::new(-o.bbox().max.y, -o.bbox().max.y, o.bbox().min.z),
             &na::Point3::new(o.bbox().max.y, o.bbox().max.y, o.bbox().max.z),
         );
         let _2pi: S = S::PI() * From::from(2.);
-        Box::new(Bender {
+        Bender {
             object: o,
             width_scaler: w / _2pi,
             bbox,
-        })
+        }
     }
     fn to_polar(&self, p: &na::Point3<S>) -> na::Point3<S> {
         let phi = Float::atan2(p.x, -p.y);
@@ -101,7 +101,7 @@ mod test {
     #[test]
     fn values_in_quadrants() {
         let m = MockObject::new(10.0, na::Vector3::new(1., 0., 0.));
-        let b = Bender::new(m, 4.);
+        let b = Bender::new(Box::new(m), 4.);
 
         assert_relative_eq!(b.approx_value(&na::Point3::new(0., 1., 0.), 0.), 10.);
         assert_relative_eq!(b.approx_value(&na::Point3::new(-1., 0., 0.), 0.), 10.);
@@ -111,7 +111,7 @@ mod test {
     #[test]
     fn normal_x_in_quadrants() {
         let m = MockObject::new(10.0, na::Vector3::new(1., 0., 0.));
-        let b = Bender::new(m, 4.);
+        let b = Bender::new(Box::new(m), 4.);
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
@@ -136,11 +136,11 @@ mod test {
     #[test]
     fn normal_y_in_quadrants() {
         let m = MockObject::new(10.0, na::Vector3::new(0., 1., 0.));
-        let b = Bender::new(m, 4.);
+        let b = Bender::new(Box::new(m), 4.);
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),
-            na::Vector3::new(0.00000000000000012246467991473532, 1., 0.0)
+            na::Vector3::new(0.000_000_000_000_000_122_464_679_914_735_32, 1., 0.0)
         );
 
         assert_relative_eq!(
@@ -155,13 +155,13 @@ mod test {
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(1., 0., 0.)),
-            na::Vector3::new(1., -0.00000000000000018369701987210297, 0.)
+            na::Vector3::new(1., -0.000_000_000_000_000_183_697_019_872_102_97, 0.)
         );
     }
     #[test]
     fn normal_z_in_quadrants() {
         let m = MockObject::new(10.0, na::Vector3::new(0., 0., 1.));
-        let b = Bender::new(m, 4.);
+        let b = Bender::new(Box::new(m), 4.);
 
         assert_relative_eq!(
             b.normal(&na::Point3::new(0., 1., 0.)),

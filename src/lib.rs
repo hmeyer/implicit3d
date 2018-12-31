@@ -19,12 +19,12 @@
 //!
 //! ```rust,no_run
 //! use std::fs::OpenOptions;
-//! let px = implicit3d::PlaneX::new(1.0);
-//! let pnx = implicit3d::PlaneNegX::new(1.0);
-//! let py = implicit3d::PlaneY::new(1.0);
-//! let pny = implicit3d::PlaneNegY::new(1.0);
-//! let pz = implicit3d::PlaneZ::new(1.0);
-//! let pnz = implicit3d::PlaneNegZ::new(1.0);
+//! let px = Box::new(implicit3d::PlaneX::new(1.0));
+//! let pnx = Box::new(implicit3d::PlaneNegX::new(1.0));
+//! let py = Box::new(implicit3d::PlaneY::new(1.0));
+//! let pny = Box::new(implicit3d::PlaneNegY::new(1.0));
+//! let pz = Box::new(implicit3d::PlaneZ::new(1.0));
+//! let pnz = Box::new(implicit3d::PlaneNegZ::new(1.0));
 //! let cube = implicit3d::Intersection::from_vec(vec![px, pnx, py, pny, pz, pnz], 0.2);
 //! ```
 

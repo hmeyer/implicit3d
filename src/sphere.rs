@@ -12,11 +12,11 @@ pub struct Sphere<S: Real> {
 
 impl<S: Real + Float> Sphere<S> {
     /// Create a new sphere of radius r.
-    pub fn new(r: S) -> Box<Sphere<S>> {
-        Box::new(Sphere {
+    pub fn new(r: S) -> Self {
+        Sphere {
             radius: r,
             bbox: BoundingBox::new(&na::Point3::new(-r, -r, -r), &na::Point3::new(r, r, r)),
-        })
+        }
     }
 }
 

@@ -14,20 +14,20 @@ pub struct MockObject<S: Real> {
 }
 
 impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
-    pub fn new(value: S, normal: na::Vector3<S>) -> Box<MockObject<S>> {
+    pub fn new(value: S, normal: na::Vector3<S>) -> Self {
         Self::new_with_bbox(value, normal, BoundingBox::infinity())
     }
     pub fn new_with_bbox(
         value: S,
         normal: na::Vector3<S>,
         bbox: BoundingBox<S>,
-    ) -> Box<MockObject<S>> {
-        Box::new(MockObject {
+    ) -> Self {
+        MockObject {
             value,
             normal,
             bbox,
             normal_call_sender: None,
-        })
+        }
     }
     pub fn add_normal_call_recorder(&mut self, buffer_size: usize) -> Receiver<na::Point3<S>> {
         let (sender, receiver) = sync_channel(buffer_size);

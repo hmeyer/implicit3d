@@ -24,7 +24,7 @@ pub struct Mesh<S: Real + Debug> {
 
 impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
     /// Create a new Mesh from a [STL file](https://en.wikipedia.org/wiki/STL_(file_format)).
-    pub fn new(stl_filename: &str) -> ::std::io::Result<Box<Mesh<S>>> {
+    pub fn try_new(stl_filename: &str) -> ::std::io::Result<Self> {
         let mut file = ::std::fs::OpenOptions::new()
             .read(true)
             .open(stl_filename)?;
@@ -49,11 +49,11 @@ impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
             })
             .collect::<Vec<_>>();
         let bbox = bbox_for_mesh(&mesh);
-        Ok(Box::new(Mesh {
+        Ok(Mesh {
             bbox,
             vertices,
             faces,
-        }))
+        })
     }
     fn value(&self, p: &na::Point3<S>) -> S {
         let p = na::Vector3::new(p.x, p.y, p.z);
