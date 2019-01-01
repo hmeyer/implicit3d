@@ -83,7 +83,7 @@ fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
         ],
         zero,
     )
-    .unwrap() as Box<Object<S>>
+    .unwrap()
 }
 
 fn cube<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
@@ -100,7 +100,7 @@ fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>() -> Box
         vec![create_cube(), Box::new(Sphere::new(From::from(0.5f32)))],
         From::from(0.2f32),
     )
-    .unwrap() as Box<Object<S>>
+    .unwrap()
 }
 
 fn hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {
