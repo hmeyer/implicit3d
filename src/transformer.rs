@@ -37,7 +37,7 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
         transformed_normal.normalize()
     }
     fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
-        let new_trans = self.transform.append_translation(&-v);
+        let new_trans = self.transform.prepend_translation(&-v);
         Box::new(AffineTransformer::new_with_scaler(
             self.object.clone(),
             new_trans,
@@ -55,7 +55,7 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
     }
     fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
         let one: S = From::from(1f32);
-        let new_trans = self.transform.append_nonuniform_scaling(&na::Vector3::new(
+        let new_trans = self.transform.prepend_nonuniform_scaling(&na::Vector3::new(
             one / s.x,
             one / s.y,
             one / s.z,
@@ -132,6 +132,18 @@ mod test {
     }
 
     #[test]
+    fn scale() {
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
+        let scale = na::Vector3::new(0.1, 0.1, 0.1);
+        let scaled = mock_object.scale(&scale);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+        assert_eq!(scaled.normal(&p), normal);
+        assert_eq!(receiver.recv().unwrap(), p / 0.1);
+    }
+
+    #[test]
     fn rotate() {
         let normal = na::Vector3::new(1.0, 0.0, 0.0);
         let mut mock_object = MockObject::new(1.0, normal);
@@ -147,6 +159,74 @@ mod test {
         assert_relative_eq!(
             receiver.try_recv().unwrap(),
             na::Point3::new(num_traits::Float::sqrt(3.0) / 2.0, 0.5, 0.0)
+        );
+    }
+
+    #[test]
+    fn scale_and_translate() {
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
+        let scale = na::Vector3::new(0.1, 0.1, 0.1);
+        let scaled = mock_object.scale(&scale);
+        let translation = na::Vector3::new(5.0, 0.0, 0.0);
+        let translated = scaled.translate(&translation);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+        assert_eq!(translated.normal(&p), normal);
+        assert_eq!(receiver.recv().unwrap(), (p - translation) / 0.1);
+    }
+
+    #[test]
+    fn translate_and_scale() {
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
+        let translation = na::Vector3::new(5.0, 0.0, 0.0);
+        let translated = mock_object.translate(&translation);
+        let scale = na::Vector3::new(0.1, 0.1, 0.1);
+        let scaled = translated.scale(&scale);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+        assert_eq!(scaled.normal(&p), normal);
+        assert_eq!(receiver.recv().unwrap(), p / 0.1 - translation);
+    }
+
+    #[test]
+    fn rotate_and_translate() {
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
+        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 2.0);
+        let rotated = mock_object.rotate(&rotation);
+        let translation = na::Vector3::new(5.0, 0.0, 0.0);
+        let translated = rotated.translate(&translation);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+        translated.normal(&p);
+        assert_relative_eq!(
+            receiver.recv().unwrap(),
+            na::Point3::new(
+                p.y - translation.y,
+                p.x - translation.x,
+                p.z - translation.z
+            ),
+            epsilon = 10e-10
+        );
+    }
+
+    #[test]
+    fn translate_and_rotate() {
+        let normal = na::Vector3::new(1.0, 0.0, 0.0);
+        let mut mock_object = MockObject::new(1.0, normal);
+        let receiver = mock_object.add_normal_call_recorder(1);
+        let translation = na::Vector3::new(5.0, 0.0, 0.0);
+        let translated = mock_object.translate(&translation);
+        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 2.0);
+        let rotated = translated.rotate(&rotation);
+        let p = na::Point3::new(1.0, 0.0, 0.0);
+        rotated.normal(&p);
+        assert_relative_eq!(
+            receiver.recv().unwrap(),
+            na::Point3::new(p.y, p.x, p.z) - translation,
+            epsilon = 10e-10
         );
     }
 }
