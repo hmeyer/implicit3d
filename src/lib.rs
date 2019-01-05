@@ -62,7 +62,7 @@ mod cylinder;
 pub use self::cylinder::{Cone, Cylinder};
 
 mod plane;
-pub use self::plane::{PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ};
+pub use self::plane::{NormalPlane, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ};
 
 mod mesh;
 pub use self::mesh::Mesh;

@@ -138,6 +138,49 @@ pub type PlaneZ<S> = Plane<AxisZ, S>;
 /// A negative XZ-Plane
 pub type PlaneNegZ<S> = Plane<AxisNegZ, S>;
 
+/// An arbitrary (not axis aligned) plane.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NormalPlane<S: Real> {
+    bbox: BoundingBox<S>,
+    normal: na::Vector3<S>,
+    p: S,
+}
+
+impl<S: From<f32> + Real + Float> NormalPlane<S> {
+    /// Create a plane in hessian form.
+    pub fn from_normal_and_p(normal: na::Vector3<S>, p: S) -> Self {
+        NormalPlane {
+            bbox: BoundingBox::infinity(),
+            normal,
+            p,
+        }
+    }
+    /// Create a plane from 3 points.
+    pub fn from_3_points(a: &na::Point3<S>, b: &na::Point3<S>, c: &na::Point3<S>) -> Self {
+        let v1 = a - c;
+        let v2 = b - c;
+        let normal = v1.cross(&v2).normalize();
+        let p = normal.dot(&a.coords);
+        NormalPlane {
+            bbox: BoundingBox::infinity(),
+            normal,
+            p,
+        }
+    }
+}
+
+impl<S: Float + From<f32> + Real> Object<S> for NormalPlane<S> {
+    fn approx_value(&self, x0: &na::Point3<S>, _: S) -> S {
+        self.normal.dot(&x0.coords) - self.p
+    }
+    fn bbox(&self) -> &BoundingBox<S> {
+        &self.bbox
+    }
+    fn normal(&self, _: &na::Point3<S>) -> na::Vector3<S> {
+        self.normal
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -151,6 +194,61 @@ mod test {
         assert_ulps_eq!(
             px.approx_value(&na::Point3::new(20., 1000., 1000.), 0.),
             10.
+        );
+    }
+
+    #[test]
+    fn hessian_x() {
+        let px = NormalPlane::from_normal_and_p(na::Vector3::new(1., 0., 0.), 0.);
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(0., 0., 0.), 0.), 0.);
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(0., 10., 100.), 0.), 0.);
+        assert_ulps_eq!(px.approx_value(&na::Point3::new(10., 0., 0.), 0.), 10.);
+    }
+
+    #[test]
+    fn hessian_xyz() {
+        let p = NormalPlane::from_normal_and_p(na::Vector3::new(1., 1., 1.).normalize(), 1.);
+        assert_ulps_eq!(p.approx_value(&na::Point3::new(0., 0., 0.), 0.), -1.);
+        assert_ulps_eq!(
+            p.approx_value(&na::Point3::new(1., 1., 1.), 0.),
+            Float::sqrt(3.) - 1.0
+        );
+        assert_ulps_eq!(
+            p.approx_value(&na::Point3::new(2., 2., 2.), 0.),
+            Float::sqrt(12.) - 1.0
+        );
+    }
+
+    #[test]
+    fn hessian_3points_x() {
+        let p = NormalPlane::from_3_points(
+            &na::Point3::new(10., 0., 0.),
+            &na::Point3::new(10., 1., 0.),
+            &na::Point3::new(10., 0., 1.),
+        );
+        assert_ulps_eq!(p.approx_value(&na::Point3::new(0., 0., 0.), 0.), -10.);
+        assert_ulps_eq!(p.approx_value(&na::Point3::new(1., 1., 1.), 0.), -9.0);
+        assert_ulps_eq!(p.approx_value(&na::Point3::new(100., 100., 100.), 0.), 90.);
+    }
+
+    #[test]
+    fn hessian_3points() {
+        let p = NormalPlane::from_3_points(
+            &na::Point3::new(0., 1., 1.),
+            &na::Point3::new(1., 0., 1.),
+            &na::Point3::new(1., 1., 0.),
+        );
+        assert_ulps_eq!(
+            p.approx_value(&na::Point3::new(0., 0., 0.), 0.),
+            -Float::sqrt(4. / 3.)
+        );
+        assert_ulps_eq!(
+            p.approx_value(&na::Point3::new(1., 1., 1.), 0.),
+            Float::sqrt(3.) - Float::sqrt(4. / 3.)
+        );
+        assert_ulps_eq!(
+            p.approx_value(&na::Point3::new(2., 2., 2.), 0.),
+            Float::sqrt(12.) - Float::sqrt(4. / 3.)
         );
     }
 }
