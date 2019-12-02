@@ -4,7 +4,7 @@ extern crate bencher;
 extern crate implicit3d;
 extern crate nalgebra;
 extern crate num_traits;
-use alga::general::Real;
+use alga::general::RealField;
 use bencher::Bencher;
 use implicit3d::{
     Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, Sphere, Twister,
@@ -15,7 +15,7 @@ use std::fmt::Debug;
 
 const STEPS: usize = 50;
 
-fn evaluate<S: From<f32> + Debug + Float + Real>(obj: &Object<S>) -> S {
+fn evaluate<S: From<f32> + Debug + Float + RealField>(obj: &dyn Object<S>) -> S {
     let zero = From::from(0f32);
     let mut p = na::Point3::new(zero, zero, obj.bbox().min.z);
     let xd = (obj.bbox().max.x - obj.bbox().min.x) / From::from(STEPS as f32);
@@ -38,7 +38,7 @@ fn evaluate<S: From<f32> + Debug + Float + Real>(obj: &Object<S>) -> S {
     result
 }
 
-fn normals<S: 'static + From<f32> + Debug + Float + Real>(obj: &Object<S>) -> na::Vector3<S> {
+fn normals<S: 'static + From<f32> + Debug + Float + RealField>(obj: &dyn Object<S>) -> na::Vector3<S> {
     let zero = From::from(0f32);
     let mut p = na::Point3::new(zero, zero, obj.bbox().min.z);
     let xd = (obj.bbox().max.x - obj.bbox().min.x) / From::from(STEPS as f32);
@@ -60,16 +60,16 @@ fn normals<S: 'static + From<f32> + Debug + Float + Real>(obj: &Object<S>) -> na
     result
 }
 
-fn sphere<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
+fn sphere<S: From<f32> + Debug + Float + RealField>(b: &mut Bencher) {
     let object = Sphere::new(From::from(1f32));
-    b.iter(|| evaluate(&object as &Object<S>));
+    b.iter(|| evaluate(&object as &dyn Object<S>));
 }
-fn sphere_normals<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
+fn sphere_normals<S: From<f32> + Debug + Float + RealField>(b: &mut Bencher) {
     let object = Sphere::new(From::from(1f32));
-    b.iter(|| normals(&object as &Object<S>));
+    b.iter(|| normals(&object as &dyn Object<S>));
 }
 
-fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
+fn create_cube<S: From<f32> + Debug + Float + RealField>() -> Box<dyn Object<S>> {
     let zero = From::from(0f32);
     let point_five = From::from(0.5f32);
     Intersection::from_vec(
@@ -86,16 +86,16 @@ fn create_cube<S: From<f32> + Debug + Float + Real>() -> Box<Object<S>> {
     .unwrap()
 }
 
-fn cube<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
+fn cube<S: From<f32> + Debug + Float + RealField>(b: &mut Bencher) {
     let object = create_cube();
-    b.iter(|| evaluate(&*object as &Object<S>));
+    b.iter(|| evaluate(&*object as &dyn Object<S>));
 }
-fn cube_normals<S: From<f32> + Debug + Float + Real>(b: &mut Bencher) {
+fn cube_normals<S: From<f32> + Debug + Float + RealField>(b: &mut Bencher) {
     let object = create_cube();
-    b.iter(|| normals(&*object as &Object<S>));
+    b.iter(|| normals(&*object as &dyn Object<S>));
 }
 
-fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>() -> Box<Object<S>> {
+fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + RealField>() -> Box<dyn Object<S>> {
     Intersection::difference_from_vec(
         vec![create_cube(), Box::new(Sphere::new(From::from(0.5f32)))],
         From::from(0.2f32),
@@ -103,22 +103,22 @@ fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>() -> Box
     .unwrap()
 }
 
-fn hollow_cube<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {
+fn hollow_cube<S: From<f32> + Debug + Float + FloatConst + RealField>(b: &mut Bencher) {
     let object = create_hollow_cube();
-    b.iter(|| evaluate(&*object as &Object<S>));
+    b.iter(|| evaluate(&*object as &dyn Object<S>));
 }
-fn hollow_cube_normals<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {
+fn hollow_cube_normals<S: From<f32> + Debug + Float + FloatConst + RealField>(b: &mut Bencher) {
     let object = create_hollow_cube();
-    b.iter(|| normals(&*object as &Object<S>));
+    b.iter(|| normals(&*object as &dyn Object<S>));
 }
 
-fn twisted_cube<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {
+fn twisted_cube<S: From<f32> + Debug + Float + FloatConst + RealField>(b: &mut Bencher) {
     let object = Twister::new(create_cube(), From::from(4f32));
-    b.iter(|| evaluate(&object as &Object<S>));
+    b.iter(|| evaluate(&object as &dyn Object<S>));
 }
-fn twisted_cube_normals<S: From<f32> + Debug + Float + FloatConst + Real>(b: &mut Bencher) {
+fn twisted_cube_normals<S: From<f32> + Debug + Float + FloatConst + RealField>(b: &mut Bencher) {
     let object = Twister::new(create_cube(), From::from(4f32));
-    b.iter(|| normals(&object as &Object<S>));
+    b.iter(|| normals(&object as &dyn Object<S>));
 }
 
 benchmark_group!(
