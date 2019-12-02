@@ -1,4 +1,4 @@
-use alga::general::Real;
+use alga::general::RealField;
 use alga::linear::Similarity;
 use na;
 use num_traits::{Float, FloatConst};
@@ -8,13 +8,13 @@ use {BoundingBox, Object, PrimitiveParameters};
 /// The object will be bend around the Z-Axis.
 /// E.g. bending a cylinder along the X-Axis (and translated away from the Z-Axis) will result in a Torus.
 #[derive(Clone, Debug)]
-pub struct Bender<S: Real> {
-    object: Box<Object<S>>,
+pub struct Bender<S: RealField> {
+    object: Box<dyn Object<S>>,
     width_scaler: S, // width_for_full_rotation / (2. * PI),
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bender<S> {
+impl<S: RealField + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bender<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -54,10 +54,10 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bende
     }
 }
 
-impl<S: Real + Float + FloatConst + From<f32>> Bender<S> {
+impl<S: RealField + Float + FloatConst + From<f32>> Bender<S> {
     /// Create a new bent object.
     /// o: Object to be bent, w: width (x) for one full rotation
-    pub fn new(o: Box<Object<S>>, w: S) -> Self {
+    pub fn new(o: Box<dyn Object<S>>, w: S) -> Self {
         let bbox = BoundingBox::new(
             &na::Point3::new(-o.bbox().max.y, -o.bbox().max.y, o.bbox().min.z),
             &na::Point3::new(o.bbox().max.y, o.bbox().max.y, o.bbox().max.z),

@@ -1,11 +1,11 @@
-use alga::general::Real;
+use alga::general::RealField;
 use na;
 use num_traits::Float;
 use std::fmt::Debug;
 use {normal_from_object, BoundingBox, Object};
 
 #[derive(Clone, Debug, PartialEq)]
-struct Face<S: Real + Debug> {
+struct Face<S: RealField + Debug> {
     normal: na::Vector3<S>,
     vertices: [usize; 3],
 }
@@ -16,13 +16,13 @@ struct Face<S: Real + Debug> {
 /// This implementation desperately needs some performance improvements, e.g. kd-tree support or
 /// similar.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Mesh<S: Real + Debug> {
+pub struct Mesh<S: RealField + Debug> {
     bbox: BoundingBox<S>,
     vertices: Vec<na::Vector3<S>>,
     faces: Vec<Face<S>>,
 }
 
-impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
+impl<S: Debug + RealField + Float + From<f64> + From<f32>> Mesh<S> {
     /// Create a new Mesh from a [STL file](https://en.wikipedia.org/wiki/STL_(file_format)).
     pub fn try_new(stl_filename: &str) -> ::std::io::Result<Self> {
         let mut file = ::std::fs::OpenOptions::new()
@@ -93,7 +93,7 @@ impl<S: Debug + Real + Float + From<f64> + From<f32>> Mesh<S> {
 }
 
 // Project p onto line ab. Return None, if the projection would not fall between a and b.
-fn point_over_line<S: Debug + Real + From<f64>>(
+fn point_over_line<S: Debug + RealField + From<f64>>(
     a: &na::Vector3<S>,
     b: &na::Vector3<S>,
     p: &na::Vector3<S>,
@@ -110,7 +110,7 @@ fn point_over_line<S: Debug + Real + From<f64>>(
 // Project p onto plane of triangle. Return None, if the projection would not fall into the
 // triangle.
 // Triangle is defined via points a,b,c and normal n.
-fn point_over_triangle<S: Debug + Real + Float + From<f64>>(
+fn point_over_triangle<S: Debug + RealField + Float + From<f64>>(
     triangle_a: &na::Vector3<S>,
     triangle_b: &na::Vector3<S>,
     triangle_c: &na::Vector3<S>,
@@ -166,7 +166,7 @@ fn point_over_triangle<S: Debug + Real + Float + From<f64>>(
 // Assumes that a and b are parallel.
 // returns 1 if a and b point in the same direction.
 // returns -1 if a and b point in opposite directions.
-fn vector_direction<S: Debug + Real + From<f64> + Float>(
+fn vector_direction<S: Debug + RealField + From<f64> + Float>(
     a: &na::Vector3<S>,
     b: &na::Vector3<S>,
 ) -> S {
@@ -189,7 +189,7 @@ fn vector_direction<S: Debug + Real + From<f64> + Float>(
 // Returns the distance between p and the triangle face (first value).
 // The second value is the acos of the angle between the normal of face and the line from p to
 //  the closest point of face.
-fn distance_point_face<S: Debug + Real + From<f64> + Float>(
+fn distance_point_face<S: Debug + RealField + From<f64> + Float>(
     face: [&na::Vector3<S>; 3],
     n: &na::Vector3<S>,
     p: &na::Vector3<S>,
@@ -240,7 +240,7 @@ fn distance_point_face<S: Debug + Real + From<f64> + Float>(
     )
 }
 
-fn bbox_for_mesh<S: Real + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> BoundingBox<S> {
+fn bbox_for_mesh<S: RealField + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> BoundingBox<S> {
     mesh.vertices
         .iter()
         .fold(BoundingBox::neg_infinity(), |mut bbox, v| {
@@ -253,7 +253,7 @@ fn bbox_for_mesh<S: Real + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> B
         })
 }
 
-impl<S: Real + Float + From<f64> + From<f32>> Object<S> for Mesh<S> {
+impl<S: RealField + Float + From<f64> + From<f32>> Object<S> for Mesh<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {

@@ -1,19 +1,19 @@
 use super::Object;
-use alga::general::Real;
+use alga::general::RealField;
 use bbox::BoundingBox;
 use na;
 use num_traits::Float;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 
 #[derive(Clone, Debug)]
-pub struct MockObject<S: Real> {
+pub struct MockObject<S: RealField> {
     value: S,
     normal: na::Vector3<S>,
     bbox: BoundingBox<S>,
     normal_call_sender: Option<SyncSender<na::Point3<S>>>,
 }
 
-impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
+impl<S: ::std::fmt::Debug + Float + RealField> MockObject<S> {
     pub fn new(value: S, normal: na::Vector3<S>) -> Self {
         Self::new_with_bbox(value, normal, BoundingBox::infinity())
     }
@@ -32,7 +32,7 @@ impl<S: ::std::fmt::Debug + Float + Real> MockObject<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for MockObject<S> {
+impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for MockObject<S> {
     fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
         self.value
     }

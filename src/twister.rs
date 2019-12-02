@@ -1,19 +1,19 @@
-use alga::general::Real;
-use alga::linear::{Similarity, Transformation};
+use alga::general::RealField;
+use alga::linear::Similarity;
 use na;
 use num_traits::Float;
 use {BoundingBox, Object, PrimitiveParameters};
 
 /// Twister will twist an object by rotating it along the Z-Axis.
 #[derive(Clone, Debug)]
-pub struct Twister<S: Real> {
-    object: Box<Object<S>>,
+pub struct Twister<S: RealField> {
+    object: Box<dyn Object<S>>,
     height_scaler: S, // 2 * pi / (height for full rotation)
     value_scaler: S,
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twister<S> {
+impl<S: RealField + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twister<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -35,10 +35,10 @@ impl<S: Real + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Twist
     }
 }
 
-impl<S: Real + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
+impl<S: RealField + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
     /// Create a twisted version ob o.
     /// o: Object to be twisted, h: height for one full rotation
-    pub fn new(o: Box<Object<S>>, h: S) -> Self {
+    pub fn new(o: Box<dyn Object<S>>, h: S) -> Self {
         let _2pi: S = S::PI() * From::from(2.);
         let mx = Float::max(Float::abs(o.bbox().min.x), Float::abs(o.bbox().max.x));
         let my = Float::max(Float::abs(o.bbox().min.y), Float::abs(o.bbox().max.y));

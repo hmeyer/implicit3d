@@ -1,4 +1,4 @@
-use alga::general::Real;
+use alga::general::RealField;
 use na;
 use num_traits::Float;
 use {BoundingBox, Object};
@@ -75,14 +75,14 @@ impl Axis for AxisNegZ {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Plane<A: Axis, S: Real> {
+pub struct Plane<A: Axis, S: RealField> {
     distance_from_zero: S,
     bbox: BoundingBox<S>,
     normal: na::Vector3<S>,
     _phantom: ::std::marker::PhantomData<A>,
 }
 
-impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
+impl<A: Axis, S: From<f32> + RealField + Float> Plane<A, S> {
     pub fn new(distance_from_zero: S) -> Self {
         let d = distance_from_zero;
         let mut p_neg = na::Point3::new(S::neg_infinity(), S::neg_infinity(), S::neg_infinity());
@@ -107,7 +107,7 @@ impl<A: Axis, S: From<f32> + Real + Float> Plane<A, S> {
     }
 }
 
-impl<A: 'static + Axis, S: Float + From<f32> + Real> Object<S> for Plane<A, S> {
+impl<A: 'static + Axis, S: Float + From<f32> + RealField> Object<S> for Plane<A, S> {
     fn approx_value(&self, p: &na::Point3<S>, _: S) -> S {
         let p: S = p[A::value()];
         let ap: S = Float::abs(p);
@@ -140,13 +140,13 @@ pub type PlaneNegZ<S> = Plane<AxisNegZ, S>;
 
 /// An arbitrary (not axis aligned) plane.
 #[derive(Clone, Debug, PartialEq)]
-pub struct NormalPlane<S: Real> {
+pub struct NormalPlane<S: RealField> {
     bbox: BoundingBox<S>,
     normal: na::Vector3<S>,
     p: S,
 }
 
-impl<S: From<f32> + Real + Float> NormalPlane<S> {
+impl<S: From<f32> + RealField + Float> NormalPlane<S> {
     /// Create a plane in hessian form.
     pub fn from_normal_and_p(normal: na::Vector3<S>, p: S) -> Self {
         NormalPlane {
@@ -169,7 +169,7 @@ impl<S: From<f32> + Real + Float> NormalPlane<S> {
     }
 }
 
-impl<S: Float + From<f32> + Real> Object<S> for NormalPlane<S> {
+impl<S: Float + From<f32> + RealField> Object<S> for NormalPlane<S> {
     fn approx_value(&self, x0: &na::Point3<S>, _: S) -> S {
         self.normal.dot(&x0.coords) - self.p
     }

@@ -1,16 +1,16 @@
-use alga::general::Real;
+use alga::general::RealField;
 use na;
 use num_traits::Float;
 use {BoundingBox, Object};
 
 /// A sphere. Simple.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Sphere<S: Real> {
+pub struct Sphere<S: RealField> {
     radius: S,
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float> Sphere<S> {
+impl<S: RealField + Float> Sphere<S> {
     /// Create a new sphere of radius r.
     pub fn new(r: S) -> Self {
         Sphere {
@@ -20,7 +20,7 @@ impl<S: Real + Float> Sphere<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + Real + Float + From<f32>> Object<S> for Sphere<S> {
+impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for Sphere<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {

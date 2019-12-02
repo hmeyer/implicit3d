@@ -1,4 +1,4 @@
-use alga::general::Real;
+use alga::general::RealField;
 use num_traits::Float;
 use {BoundingBox, Object, PrimitiveParameters};
 
@@ -6,15 +6,15 @@ use {BoundingBox, Object, PrimitiveParameters};
 /// AffineTransformer is a primitive that takes an object as input and allows to modify it using
 /// affine transforms.
 /// Usually it is used indirectly through ```Object::scale()```, ```Object::translate()``` or ```Object::rotate()```.
-pub struct AffineTransformer<S: Real> {
-    object: Box<Object<S>>,
+pub struct AffineTransformer<S: RealField> {
+    object: Box<dyn Object<S>>,
     transform: na::Matrix4<S>,
     transposed3x3: na::Matrix3<S>,
     scale_min: S,
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
+impl<S: RealField + Float + From<f32>> Object<S> for AffineTransformer<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -36,7 +36,7 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
         let transformed_normal = self.transposed3x3 * normal_at_p;
         transformed_normal.normalize()
     }
-    fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
+    fn translate(&self, v: &na::Vector3<S>) -> Box<dyn Object<S>> {
         let new_trans = self.transform.prepend_translation(&-v);
         Box::new(AffineTransformer::new_with_scaler(
             self.object.clone(),
@@ -44,7 +44,7 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
             self.scale_min,
         ))
     }
-    fn rotate(&self, r: &na::Vector3<S>) -> Box<Object<S>> {
+    fn rotate(&self, r: &na::Vector3<S>) -> Box<dyn Object<S>> {
         let euler = ::na::Rotation::from_euler_angles(r.x, r.y, r.z).to_homogeneous();
         let new_trans = self.transform * euler;
         Box::new(AffineTransformer::new_with_scaler(
@@ -53,7 +53,7 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
             self.scale_min,
         ))
     }
-    fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
+    fn scale(&self, s: &na::Vector3<S>) -> Box<dyn Object<S>> {
         let one: S = From::from(1f32);
         let new_trans = self.transform.prepend_nonuniform_scaling(&na::Vector3::new(
             one / s.x,
@@ -68,15 +68,15 @@ impl<S: Real + Float + From<f32>> Object<S> for AffineTransformer<S> {
     }
 }
 
-impl<S: Real + Float + From<f32>> AffineTransformer<S> {
-    fn identity(o: Box<Object<S>>) -> Self {
+impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
+    fn identity(o: Box<dyn Object<S>>) -> Self {
         AffineTransformer::new(o, na::Matrix4::identity())
     }
-    fn new(o: Box<Object<S>>, t: na::Matrix4<S>) -> Self {
+    fn new(o: Box<dyn Object<S>>, t: na::Matrix4<S>) -> Self {
         let one: S = From::from(1f32);
         AffineTransformer::new_with_scaler(o, t, one)
     }
-    fn new_with_scaler(o: Box<Object<S>>, t: na::Matrix4<S>, scale_min: S) -> Self {
+    fn new_with_scaler(o: Box<dyn Object<S>>, t: na::Matrix4<S>, scale_min: S) -> Self {
         // TODO: Calculate scale_min from t.
         // This should be something similar to
         // 1./Vector::new(t.x.x, t.y.x, t.z.x).magnitude().min(
@@ -101,15 +101,15 @@ impl<S: Real + Float + From<f32>> AffineTransformer<S> {
         }
     }
     /// Create a new translated version of the input.
-    pub fn new_translate(o: Box<Object<S>>, v: &na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_translate(o: Box<dyn Object<S>>, v: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::identity(o).translate(v)
     }
     /// Create a new rotated version of the input.
-    pub fn new_rotate(o: Box<Object<S>>, r: &na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_rotate(o: Box<dyn Object<S>>, r: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::identity(o).rotate(r)
     }
     /// Create a new scaled version of the input.
-    pub fn new_scale(o: Box<Object<S>>, s: &na::Vector3<S>) -> Box<Object<S>> {
+    pub fn new_scale(o: Box<dyn Object<S>>, s: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::identity(o).scale(s)
     }
 }

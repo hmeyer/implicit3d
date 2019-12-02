@@ -1,16 +1,16 @@
-use alga::general::Real;
+use alga::general::RealField;
 use na;
 use num_traits::Float;
 use {BoundingBox, Object};
 
 /// A cylinder along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
-pub struct Cylinder<S: Real> {
+pub struct Cylinder<S: RealField> {
     radius: S,
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float> Cylinder<S> {
+impl<S: RealField + Float> Cylinder<S> {
     /// Create a new infinite Cylinder (along the Z-Axis) of radius r.
     pub fn new(r: S) -> Self {
         Cylinder {
@@ -23,7 +23,7 @@ impl<S: Real + Float> Cylinder<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> {
+impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cylinder<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -46,7 +46,7 @@ impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cylinder<S> 
 
 /// A cone along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
-pub struct Cone<S: Real> {
+pub struct Cone<S: RealField> {
     slope: S,
     distance_multiplier: S,
     offset: S,            // Offset the singularity from Z-zero
@@ -54,7 +54,7 @@ pub struct Cone<S: Real> {
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float + From<f32>> Cone<S> {
+impl<S: RealField + Float + From<f32>> Cone<S> {
     /// Create a new infinite Cone (along the Z-Axis) for a given slope and and offset from origin.
     pub fn new(slope: S, offset: S) -> Self {
         let one: S = From::from(1f32);
@@ -68,7 +68,7 @@ impl<S: Real + Float + From<f32>> Cone<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + Real + From<f32> + Float> Object<S> for Cone<S> {
+impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cone<S> {
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }

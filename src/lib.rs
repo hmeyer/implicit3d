@@ -38,7 +38,7 @@ extern crate bbox;
 extern crate nalgebra as na;
 extern crate num_traits;
 extern crate stl_io;
-use alga::general::Real;
+use alga::general::RealField;
 pub use bbox::BoundingBox;
 use num_traits::Float;
 use std::fmt::Debug;
@@ -84,8 +84,8 @@ const EPSILON: f32 = 1e-10;
 
 /// Get a normal from an Object a some point. Do this using approximating the derivative with
 /// deltas.
-fn normal_from_object<S: Debug + Real + Float + From<f32>>(
-    f: &Object<S>,
+fn normal_from_object<S: Debug + RealField + Float + From<f32>>(
+    f: &dyn Object<S>,
     p: &na::Point3<S>,
 ) -> na::Vector3<S> {
     let null: S = From::from(0.0);
@@ -102,7 +102,7 @@ fn normal_from_object<S: Debug + Real + Float + From<f32>>(
 }
 
 /// Object is the basic trait for any 3d implicit function.
-pub trait Object<S: Real + Float + From<f32>>: ObjectClone<S> + Debug + Sync + Send {
+pub trait Object<S: RealField + Float + From<f32>>: ObjectClone<S> + Debug + Sync + Send {
     /// Get the Bounding Box of this Object.
     fn bbox(&self) -> &BoundingBox<S>;
     /// Explicitly set the Bounding Box.
@@ -123,15 +123,15 @@ pub trait Object<S: Real + Float + From<f32>>: ObjectClone<S> + Debug + Sync + S
         unimplemented!();
     }
     /// Return a translated version of ```self```.
-    fn translate(&self, v: &na::Vector3<S>) -> Box<Object<S>> {
+    fn translate(&self, v: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::new_translate(self.clone_box(), v)
     }
     /// Return a rotated version of ```self```.
-    fn rotate(&self, r: &na::Vector3<S>) -> Box<Object<S>> {
+    fn rotate(&self, r: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::new_rotate(self.clone_box(), r)
     }
     /// Return a scaled version of ```self```.
-    fn scale(&self, s: &na::Vector3<S>) -> Box<Object<S>> {
+    fn scale(&self, s: &na::Vector3<S>) -> Box<dyn Object<S>> {
         AffineTransformer::new_scale(self.clone_box(), s)
     }
 }
@@ -139,35 +139,35 @@ pub trait Object<S: Real + Float + From<f32>>: ObjectClone<S> + Debug + Sync + S
 /// Trait to allow cloning of ```Box<Object<_>>```.
 pub trait ObjectClone<S> {
     /// Clone ```Box<Object<_>>```.
-    fn clone_box(&self) -> Box<Object<S>>;
+    fn clone_box(&self) -> Box<dyn Object<S>>;
 }
 
-impl<S: Real + Float + From<f32>, T> ObjectClone<S> for T
+impl<S: RealField + Float + From<f32>, T> ObjectClone<S> for T
 where
     T: 'static + Object<S> + Clone,
 {
-    fn clone_box(&self) -> Box<Object<S>> {
+    fn clone_box(&self) -> Box<dyn Object<S>> {
         Box::new(self.clone())
     }
 }
 
 // We can now implement Clone manually by forwarding to clone_box.
-impl<S> Clone for Box<Object<S>> {
-    fn clone(&self) -> Box<Object<S>> {
+impl<S> Clone for Box<dyn Object<S>> {
+    fn clone(&self) -> Box<dyn Object<S>> {
         self.clone_box()
     }
 }
 
 // Objects never equal each other
-impl<S> PartialEq for Box<Object<S>> {
-    fn eq(&self, _: &Box<Object<S>>) -> bool {
+impl<S> PartialEq for Box<dyn Object<S>> {
+    fn eq(&self, _: &Box<dyn Object<S>>) -> bool {
         false
     }
 }
 
 // Objects are never ordered
-impl<S> PartialOrd for Box<Object<S>> {
-    fn partial_cmp(&self, _: &Box<Object<S>>) -> Option<::std::cmp::Ordering> {
+impl<S> PartialOrd for Box<dyn Object<S>> {
+    fn partial_cmp(&self, _: &Box<dyn Object<S>>) -> Option<::std::cmp::Ordering> {
         None
     }
 }

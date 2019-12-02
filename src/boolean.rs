@@ -1,4 +1,4 @@
-use alga::general::Real;
+use alga::general::RealField;
 use na;
 use num_traits::Float;
 use {normal_from_object, BoundingBox, Object, PrimitiveParameters, ALWAYS_PRECISE};
@@ -8,17 +8,17 @@ const R_MULTIPLIER: f32 = 1.0;
 
 /// Union create an implict function as the union of its inputs.
 #[derive(Clone, Debug)]
-pub struct Union<S: Real> {
-    objs: Vec<Box<Object<S>>>,
+pub struct Union<S: RealField> {
+    objs: Vec<Box<dyn Object<S>>>,
     r: S,
     exact_range: S, // Calculate smooth transitions over this range
     fade_range: S,  // Fade normal over this fraction of the smoothing range
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float + From<f32>> Union<S> {
+impl<S: RealField + Float + From<f32>> Union<S> {
     /// Create a union of all the objects in v. The union will be rounded, if r > 0.
-    pub fn from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
+    pub fn from_vec(mut v: Vec<Box<dyn Object<S>>>, r: S) -> Option<Box<dyn Object<S>>> {
         match v.len() {
             0 => None,
             1 => Some(v.pop().unwrap()),
@@ -41,7 +41,7 @@ impl<S: Real + Float + From<f32>> Union<S> {
     }
 }
 
-impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
+impl<S: RealField + From<f32> + Float> Object<S> for Union<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -103,17 +103,17 @@ impl<S: Real + From<f32> + Float> Object<S> for Union<S> {
 
 /// Intersect objects.
 #[derive(Clone, Debug)]
-pub struct Intersection<S: Real> {
-    objs: Vec<Box<Object<S>>>,
+pub struct Intersection<S: RealField> {
+    objs: Vec<Box<dyn Object<S>>>,
     r: S,
     exact_range: S, // Calculate smooth transitions over this range
     fade_range: S,  // Fade normal over this fraction of the smoothing range
     bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float + From<f32>> Intersection<S> {
+impl<S: RealField + Float + From<f32>> Intersection<S> {
     /// Create an intersection of the objects in v. The intersection will be rounded, if r > 0.
-    pub fn from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
+    pub fn from_vec(mut v: Vec<Box<dyn Object<S>>>, r: S) -> Option<Box<dyn Object<S>>> {
         match v.len() {
             0 => None,
             1 => Some(v.pop().unwrap()),
@@ -136,7 +136,7 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
     /// Create a Difference from Vec. The resulting object is v[0] minus all the other objects.
     /// Minus is implemented as intersection with negation.
     /// The difference will be rounded, if r > 0.
-    pub fn difference_from_vec(mut v: Vec<Box<Object<S>>>, r: S) -> Option<Box<Object<S>>> {
+    pub fn difference_from_vec(mut v: Vec<Box<dyn Object<S>>>, r: S) -> Option<Box<dyn Object<S>>> {
         match v.len() {
             0 => None,
             1 => Some(v.pop().unwrap()),
@@ -149,7 +149,7 @@ impl<S: Real + Float + From<f32>> Intersection<S> {
     }
 }
 
-impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
+impl<S: RealField + From<f32> + Float> Object<S> for Intersection<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -210,26 +210,26 @@ impl<S: Real + From<f32> + Float> Object<S> for Intersection<S> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Negation<S: Real> {
-    object: Box<Object<S>>,
+pub struct Negation<S: RealField> {
+    object: Box<dyn Object<S>>,
     infinity_bbox: BoundingBox<S>,
 }
 
-impl<S: Real + Float + From<f32>> Negation<S> {
-    pub fn new(o: Box<Object<S>>) -> Self {
+impl<S: RealField + Float + From<f32>> Negation<S> {
+    pub fn new(o: Box<dyn Object<S>>) -> Self {
         Negation {
             object: o,
             infinity_bbox: BoundingBox::<S>::infinity(),
         }
     }
-    pub fn from_vec(v: &[Box<Object<S>>]) -> Vec<Box<Object<S>>> {
+    pub fn from_vec(v: &[Box<dyn Object<S>>]) -> Vec<Box<dyn Object<S>>> {
         v.iter()
-            .map(|o| Box::new(Negation::new(o.clone())) as Box<Object<S>>)
+            .map(|o| Box::new(Negation::new(o.clone())) as Box<dyn Object<S>>)
             .collect()
     }
 }
 
-impl<S: Real + From<f32> + Float> Object<S> for Negation<S> {
+impl<S: RealField + From<f32> + Float> Object<S> for Negation<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         -self.object.approx_value(p, slack)
     }
