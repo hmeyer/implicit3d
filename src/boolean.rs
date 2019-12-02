@@ -32,7 +32,7 @@ impl<S: RealField + Float + From<f32>> Union<S> {
                 Some(Box::new(Union {
                     objs: v,
                     r,
-                    bbox: bbox,
+                    bbox,
                     exact_range: r * From::from(R_MULTIPLIER),
                     fade_range: From::from(FADE_RANGE),
                 }))
