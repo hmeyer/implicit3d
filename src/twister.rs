@@ -1,8 +1,6 @@
-use alga::general::RealField;
-use alga::linear::Similarity;
+use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
 use na;
 use num_traits::Float;
-use {BoundingBox, Object, PrimitiveParameters};
 
 /// Twister will twist an object by rotating it along the Z-Axis.
 #[derive(Clone, Debug)]
@@ -97,15 +95,15 @@ impl<S: RealField + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
         let v2 = ::na::Vector2::new(v.x, v.y);
         let angle = -p.z * self.height_scaler;
         let trans = ::na::Rotation2::new(angle);
-        let rv2 = trans.rotate_vector(&v2);
+        let rv2 = trans.transform_vector(&v2);
         self.tilt_normal(na::Vector3::new(rv2.x, rv2.y, v.z), p)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::super::test::MockObject;
-    use super::*;
+    use crate::test::MockObject;
+    use crate::*;
 
     #[test]
     fn simple() {

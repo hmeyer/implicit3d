@@ -1,7 +1,8 @@
-use alga::general::RealField;
+use crate::{
+    normal_from_object, BoundingBox, Object, PrimitiveParameters, RealField, ALWAYS_PRECISE,
+};
 use na;
 use num_traits::Float;
-use {normal_from_object, BoundingBox, Object, PrimitiveParameters, ALWAYS_PRECISE};
 
 const FADE_RANGE: f32 = 0.1;
 const R_MULTIPLIER: f32 = 1.0;
@@ -303,8 +304,8 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
 
 #[cfg(test)]
 mod test {
-    use super::super::test::MockObject;
     use super::*;
+    use crate::test::MockObject;
 
     #[test]
     fn union() {

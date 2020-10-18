@@ -1,6 +1,5 @@
-use alga::general::RealField;
+use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
 use num_traits::Float;
-use {BoundingBox, Object, PrimitiveParameters};
 
 #[derive(Clone, Debug)]
 /// AffineTransformer is a primitive that takes an object as input and allows to modify it using
@@ -82,11 +81,10 @@ impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
         // 1./Vector::new(t.x.x, t.y.x, t.z.x).magnitude().min(
         // 1./Vector::new(t.x.y, t.y.y, t.z.y).magnitude().min(
         // 1./Vector::new(t.x.z, t.y.z, t.z.z).magnitude()))
-
         match t.try_inverse() {
             None => panic!("Failed to invert {:?}", t),
-            Some(t_inv) => {
-                let bbox = o.bbox().transform(&t_inv);
+            Some(ref t_inv) => {
+                let bbox = o.bbox().transform(t_inv);
                 let transposed3x3 = t
                     .fixed_slice::<::na::core::dimension::U3, ::na::core::dimension::U3>(0, 0)
                     .transpose();
@@ -116,8 +114,8 @@ impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
 
 #[cfg(test)]
 mod test {
-    use super::super::test::MockObject;
-    use super::*;
+    use crate::test::MockObject;
+    use crate::Object;
 
     #[test]
     fn translate() {

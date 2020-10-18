@@ -1,7 +1,6 @@
-use alga::general::RealField;
+use crate::{BoundingBox, Object, RealField};
 use na;
 use num_traits::Float;
-use {BoundingBox, Object};
 
 pub trait Axis: ::std::fmt::Debug + Clone + ::std::marker::Sync + ::std::marker::Send {
     fn value() -> usize;
@@ -183,7 +182,7 @@ impl<S: Float + From<f32> + RealField> Object<S> for NormalPlane<S> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use crate::*;
 
     #[test]
     fn simple() {

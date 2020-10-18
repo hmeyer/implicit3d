@@ -1,7 +1,6 @@
-use alga::general::RealField;
+use crate::{BoundingBox, Object, RealField};
 use na;
 use num_traits::Float;
-use {BoundingBox, Object};
 
 /// A sphere. Simple.
 #[derive(Clone, Debug, PartialEq)]
@@ -39,7 +38,7 @@ impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for Sphere<
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use crate::*;
 
     #[test]
     fn simple() {

@@ -1,8 +1,6 @@
-use alga::general::RealField;
-use alga::linear::Similarity;
+use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
 use na;
 use num_traits::{Float, FloatConst};
-use {BoundingBox, Object, PrimitiveParameters};
 
 /// Bender create an implicit function that represents a bended version of it's input.
 /// The object will be bend around the Z-Axis.
@@ -88,15 +86,15 @@ impl<S: RealField + Float + FloatConst + From<f32>> Bender<S> {
         let phi = polar_p.x;
         let v2 = ::na::Vector2::new(v.x, -v.y);
         let trans = ::na::Rotation2::new(phi);
-        let rv2 = trans.rotate_vector(&v2);
+        let rv2 = trans.transform_vector(&v2);
         na::Vector3::new(rv2.x, rv2.y, v.z)
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::super::test::MockObject;
     use super::*;
+    use crate::test::MockObject;
 
     #[test]
     fn values_in_quadrants() {
@@ -183,5 +181,4 @@ mod test {
             na::Vector3::new(0., 0., 1.)
         );
     }
-
 }

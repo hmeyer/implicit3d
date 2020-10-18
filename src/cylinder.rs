@@ -1,7 +1,6 @@
-use alga::general::RealField;
+use crate::{BoundingBox, Object, RealField};
 use na;
 use num_traits::Float;
-use {BoundingBox, Object};
 
 /// A cylinder along the Z-Axis
 #[derive(Clone, Debug, PartialEq)]
@@ -94,7 +93,7 @@ impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cone<S>
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use crate::*;
 
     #[test]
     fn cylinder() {

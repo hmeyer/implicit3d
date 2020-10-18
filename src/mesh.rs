@@ -1,8 +1,7 @@
-use alga::general::RealField;
+use crate::{normal_from_object, BoundingBox, Object, RealField};
 use na;
 use num_traits::Float;
 use std::fmt::Debug;
-use {normal_from_object, BoundingBox, Object};
 
 #[derive(Clone, Debug, PartialEq)]
 struct Face<S: RealField + Debug> {

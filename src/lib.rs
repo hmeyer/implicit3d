@@ -38,10 +38,14 @@ extern crate bbox;
 extern crate nalgebra as na;
 extern crate num_traits;
 extern crate stl_io;
-use alga::general::RealField;
 pub use bbox::BoundingBox;
 use num_traits::Float;
 use std::fmt::Debug;
+
+/// A Combination of alga::general::RealField and na::RealField.
+pub trait RealField: alga::general::RealField + na::RealField {}
+impl RealField for f64 {}
+impl RealField for f32 {}
 
 mod transformer;
 pub use self::transformer::AffineTransformer;

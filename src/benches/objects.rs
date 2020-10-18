@@ -4,10 +4,10 @@ extern crate bencher;
 extern crate implicit3d;
 extern crate nalgebra;
 extern crate num_traits;
-use alga::general::RealField;
 use bencher::Bencher;
 use implicit3d::{
-    Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, Sphere, Twister,
+    Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, RealField,
+    Sphere, Twister,
 };
 use nalgebra as na;
 use num_traits::{Float, FloatConst};
@@ -38,7 +38,9 @@ fn evaluate<S: From<f32> + Debug + Float + RealField>(obj: &dyn Object<S>) -> S 
     result
 }
 
-fn normals<S: 'static + From<f32> + Debug + Float + RealField>(obj: &dyn Object<S>) -> na::Vector3<S> {
+fn normals<S: 'static + From<f32> + Debug + Float + RealField>(
+    obj: &dyn Object<S>,
+) -> na::Vector3<S> {
     let zero = From::from(0f32);
     let mut p = na::Point3::new(zero, zero, obj.bbox().min.z);
     let xd = (obj.bbox().max.x - obj.bbox().min.x) / From::from(STEPS as f32);
@@ -95,7 +97,8 @@ fn cube_normals<S: From<f32> + Debug + Float + RealField>(b: &mut Bencher) {
     b.iter(|| normals(&*object as &dyn Object<S>));
 }
 
-fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + RealField>() -> Box<dyn Object<S>> {
+fn create_hollow_cube<S: From<f32> + Debug + Float + FloatConst + RealField>() -> Box<dyn Object<S>>
+{
     Intersection::difference_from_vec(
         vec![create_cube(), Box::new(Sphere::new(From::from(0.5f32)))],
         From::from(0.2f32),

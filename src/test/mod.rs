@@ -1,5 +1,4 @@
-use super::Object;
-use alga::general::RealField;
+use crate::{Object, RealField};
 use bbox::BoundingBox;
 use na;
 use num_traits::Float;
