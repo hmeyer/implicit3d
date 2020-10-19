@@ -1,5 +1,4 @@
 use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
-use na;
 use num_traits::{Float, FloatConst};
 
 /// Bender create an implicit function that represents a bended version of it's input.

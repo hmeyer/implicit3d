@@ -1,8 +1,5 @@
-
 #[macro_use]
 extern crate bencher;
-
-use nalgebra;
 
 use bencher::Bencher;
 use implicit3d::{

@@ -1,5 +1,4 @@
 use crate::{normal_from_object, BoundingBox, Object, RealField};
-use na;
 use num_traits::Float;
 use std::fmt::Debug;
 
@@ -359,11 +358,11 @@ mod test {
 
     #[test]
     fn test_distance_point_face_by_halfcircle_around_face_edge() {
-        let a = na::Vector3::new(0., 0., 1.);
-        let b = na::Vector3::new(0., 0., -1.);
-        let c = na::Vector3::new(0., -1., 0.);
-        let face = [&a, &b, &c];
-        let n = na::Vector3::new(-1., 0., 0.);
+        let point_a = na::Vector3::new(0., 0., 1.);
+        let point_b = na::Vector3::new(0., 0., -1.);
+        let point_c = na::Vector3::new(0., -1., 0.);
+        let face = [&point_a, &point_b, &point_c];
+        let normal = na::Vector3::new(-1., 0., 0.);
 
         let steps = 100;
         let dist = 100.0;
@@ -372,7 +371,7 @@ mod test {
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
-            let result = distance_point_face(face, &n, &p);
+            let result = distance_point_face(face, &normal, &p);
             assert_ulps_eq!(result.0, dist);
             assert_ulps_eq!(result.1, angle.cos());
         }
@@ -380,11 +379,11 @@ mod test {
 
     #[test]
     fn test_distance_point_face_by_halfcircle_around_face_point() {
-        let a = na::Vector3::new(0., -1., 1.);
-        let b = na::Vector3::new(0., -1., -1.);
-        let c = na::Vector3::new(0., 0., 0.);
-        let face = [&a, &b, &c];
-        let n = na::Vector3::new(-1., 0., 0.);
+        let point_a = na::Vector3::new(0., -1., 1.);
+        let point_b = na::Vector3::new(0., -1., -1.);
+        let point_c = na::Vector3::new(0., 0., 0.);
+        let face = [&point_a, &point_b, &point_c];
+        let normal = na::Vector3::new(-1., 0., 0.);
 
         let steps = 10;
         let dist = 100.0;
@@ -393,7 +392,7 @@ mod test {
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
-            let result = distance_point_face(face, &n, &p);
+            let result = distance_point_face(face, &normal, &p);
             assert_ulps_eq!(result.0, dist);
             assert_ulps_eq!(result.1, angle.cos());
         }

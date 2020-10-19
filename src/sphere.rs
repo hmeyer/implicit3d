@@ -1,5 +1,4 @@
 use crate::{BoundingBox, Object, RealField};
-use na;
 use num_traits::Float;
 
 /// A sphere. Simple.

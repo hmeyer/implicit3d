@@ -1,6 +1,5 @@
 use crate::{Object, RealField};
 use bbox::BoundingBox;
-use na;
 use num_traits::Float;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 

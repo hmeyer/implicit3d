@@ -30,13 +30,11 @@
 
 #![warn(missing_docs)]
 
-use alga;
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
 
 extern crate nalgebra as na;
-
 
 pub use bbox::BoundingBox;
 use num_traits::Float;

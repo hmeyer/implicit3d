@@ -1,5 +1,4 @@
 use crate::{BoundingBox, Object, RealField};
-use na;
 use num_traits::Float;
 
 pub trait Axis: ::std::fmt::Debug + Clone + ::std::marker::Sync + ::std::marker::Send {

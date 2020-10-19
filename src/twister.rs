@@ -1,5 +1,4 @@
 use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
-use na;
 use num_traits::Float;
 
 /// Twister will twist an object by rotating it along the Z-Axis.

@@ -1,7 +1,6 @@
 use crate::{
     normal_from_object, BoundingBox, Object, PrimitiveParameters, RealField, ALWAYS_PRECISE,
 };
-use na;
 use num_traits::Float;
 
 const FADE_RANGE: f32 = 0.1;
