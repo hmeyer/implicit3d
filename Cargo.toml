@@ -1,6 +1,6 @@
 [package]
 name = "implicit3d"
-version = "0.14.0"
+version = "0.14.1"
 authors = ["Henning Meyer <tutmann@gmail.com>"]
 edition = "2018"
 

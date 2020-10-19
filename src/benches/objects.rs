@@ -1,9 +1,9 @@
-extern crate alga;
+
 #[macro_use]
 extern crate bencher;
-extern crate implicit3d;
-extern crate nalgebra;
-extern crate num_traits;
+
+use nalgebra;
+
 use bencher::Bencher;
 use implicit3d::{
     Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, RealField,

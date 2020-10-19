@@ -30,14 +30,14 @@
 
 #![warn(missing_docs)]
 
-extern crate alga;
+use alga;
 #[cfg(test)]
 #[macro_use]
 extern crate approx;
-extern crate bbox;
+
 extern crate nalgebra as na;
-extern crate num_traits;
-extern crate stl_io;
+
+
 pub use bbox::BoundingBox;
 use num_traits::Float;
 use std::fmt::Debug;
