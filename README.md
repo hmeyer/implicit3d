@@ -1,5 +1,5 @@
 # implicit3d
-[![Build Status](https://travis-ci.org/hmeyer/implicit3d.svg?branch=master)](https://travis-ci.org/hmeyer/implicit3d)
+![build workflow](https://github.com/hmeyer/implicit3d/actions/workflows/rust.yml/badge.svg)
 [![Codecov](https://codecov.io/github/hmeyer/implicit3d/coverage.svg?branch=master)](https://codecov.io/github/hmeyer/implicit3d)
 [![Cargo](https://img.shields.io/crates/v/implicit3d.svg)](https://crates.io/crates/implicit3d)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
