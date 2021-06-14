@@ -86,7 +86,7 @@ impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
             Some(ref t_inv) => {
                 let bbox = o.bbox().transform(t_inv);
                 let transposed3x3 = t
-                    .fixed_slice::<::na::core::dimension::U3, ::na::core::dimension::U3>(0, 0)
+                    .fixed_slice::<3, 3>(0, 0)
                     .transpose();
                 AffineTransformer {
                     object: o,

@@ -62,7 +62,7 @@ impl<S: RealField + Float + ::num_traits::FloatConst + From<f32>> Twister<S> {
     fn twist_point(&self, p: &na::Point3<S>) -> na::Point3<S> {
         let p2 = ::na::Point2::new(p.x, p.y);
         let angle = p.z * self.height_scaler;
-        type Rota<S> = ::na::Rotation<S, ::na::U2>;
+        type Rota<S> = ::na::Rotation<S, 2>;
         let trans = Rota::new(angle);
         let rp2 = trans.transform_point(&p2);
         na::Point3::new(rp2.x, rp2.y, p.z)
