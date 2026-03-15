@@ -16,7 +16,7 @@ path = "src/lib.rs"
 
 [dependencies]
 nalgebra = "0.34"
-stl_io = "0.10"
+stl_io = "0.11"
 bbox = "0.15"
 num-traits = "0.2"
 
