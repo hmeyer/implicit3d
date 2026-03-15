@@ -30,18 +30,16 @@
 
 #![warn(missing_docs)]
 
-#[cfg(test)]
-#[macro_use]
-extern crate approx;
+use nalgebra as na;
 
-extern crate nalgebra as na;
-
-pub use bbox::BoundingBox;
+/// A 3D bounding box.
+pub type BoundingBox<S> = bbox::BoundingBox<S, 3>;
 use num_traits::Float;
 use std::fmt::Debug;
 
-/// A Combination of alga::general::RealField and na::RealField.
-pub trait RealField: alga::general::RealField + na::RealField {}
+/// A scalar type suitable for use with implicit3d objects.
+/// Combines nalgebra's RealField with num_traits::Float.
+pub trait RealField: na::RealField + Copy {}
 impl RealField for f64 {}
 impl RealField for f32 {}
 
@@ -169,7 +167,7 @@ impl<S> PartialEq for Box<dyn Object<S>> {
 
 // Objects are never ordered
 impl<S> PartialOrd for Box<dyn Object<S>> {
-    fn partial_cmp(&self, _: &Box<dyn Object<S>>) -> Option<::std::cmp::Ordering> {
+    fn partial_cmp(&self, _: &Box<dyn Object<S>>) -> Option<std::cmp::Ordering> {
         None
     }
 }

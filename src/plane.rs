@@ -1,7 +1,8 @@
 use crate::{BoundingBox, Object, RealField};
+use nalgebra as na;
 use num_traits::Float;
 
-pub trait Axis: ::std::fmt::Debug + Clone + ::std::marker::Sync + ::std::marker::Send {
+pub trait Axis: std::fmt::Debug + Clone + Sync + Send {
     fn value() -> usize;
     fn inverted() -> bool;
 }
@@ -77,7 +78,7 @@ pub struct Plane<A: Axis, S: RealField> {
     distance_from_zero: S,
     bbox: BoundingBox<S>,
     normal: na::Vector3<S>,
-    _phantom: ::std::marker::PhantomData<A>,
+    _phantom: std::marker::PhantomData<A>,
 }
 
 impl<A: Axis, S: From<f32> + RealField + Float> Plane<A, S> {
@@ -100,7 +101,7 @@ impl<A: Axis, S: From<f32> + RealField + Float> Plane<A, S> {
             distance_from_zero: d,
             bbox: BoundingBox::new(&p_neg, &p_pos),
             normal,
-            _phantom: ::std::marker::PhantomData,
+            _phantom: std::marker::PhantomData,
         }
     }
 }
@@ -181,7 +182,9 @@ impl<S: Float + From<f32> + RealField> Object<S> for NormalPlane<S> {
 
 #[cfg(test)]
 mod test {
+    use approx::assert_ulps_eq;
     use crate::*;
+    use nalgebra as na;
 
     #[test]
     fn simple() {

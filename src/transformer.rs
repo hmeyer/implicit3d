@@ -1,4 +1,5 @@
 use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
+use nalgebra as na;
 use num_traits::Float;
 
 #[derive(Clone, Debug)]
@@ -44,7 +45,7 @@ impl<S: RealField + Float + From<f32>> Object<S> for AffineTransformer<S> {
         ))
     }
     fn rotate(&self, r: &na::Vector3<S>) -> Box<dyn Object<S>> {
-        let euler = ::na::Rotation::from_euler_angles(r.x, r.y, r.z).to_homogeneous();
+        let euler = na::Rotation3::from_euler_angles(r.x, r.y, r.z).to_homogeneous();
         let new_trans = self.transform * euler;
         Box::new(AffineTransformer::new_with_scaler(
             self.object.clone(),
@@ -86,7 +87,7 @@ impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
             Some(ref t_inv) => {
                 let bbox = o.bbox().transform(t_inv);
                 let transposed3x3 = t
-                    .fixed_slice::<::na::core::dimension::U3, ::na::core::dimension::U3>(0, 0)
+                    .fixed_view::<3, 3>(0, 0)
                     .transpose();
                 AffineTransformer {
                     object: o,
@@ -114,8 +115,10 @@ impl<S: RealField + Float + From<f32>> AffineTransformer<S> {
 
 #[cfg(test)]
 mod test {
+    use approx::assert_relative_eq;
     use crate::test::MockObject;
     use crate::Object;
+    use nalgebra as na;
 
     #[test]
     fn translate() {
@@ -146,7 +149,7 @@ mod test {
         let normal = na::Vector3::new(1.0, 0.0, 0.0);
         let mut mock_object = MockObject::new(1.0, normal);
         let receiver = mock_object.add_normal_call_recorder(1);
-        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 6.0);
+        let rotation = na::Vector3::new(0.0, 0.0, std::f64::consts::PI / 6.0);
         let rotated = mock_object.rotate(&rotation);
         let p = na::Point3::new(1.0, 0.0, 0.0);
 
@@ -193,7 +196,7 @@ mod test {
         let normal = na::Vector3::new(1.0, 0.0, 0.0);
         let mut mock_object = MockObject::new(1.0, normal);
         let receiver = mock_object.add_normal_call_recorder(1);
-        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 2.0);
+        let rotation = na::Vector3::new(0.0, 0.0, std::f64::consts::PI / 2.0);
         let rotated = mock_object.rotate(&rotation);
         let translation = na::Vector3::new(5.0, 0.0, 0.0);
         let translated = rotated.translate(&translation);
@@ -217,7 +220,7 @@ mod test {
         let receiver = mock_object.add_normal_call_recorder(1);
         let translation = na::Vector3::new(5.0, 0.0, 0.0);
         let translated = mock_object.translate(&translation);
-        let rotation = na::Vector3::new(0.0, 0.0, ::std::f64::consts::PI / 2.0);
+        let rotation = na::Vector3::new(0.0, 0.0, std::f64::consts::PI / 2.0);
         let rotated = translated.rotate(&rotation);
         let p = na::Point3::new(1.0, 0.0, 0.0);
         rotated.normal(&p);

@@ -1,5 +1,5 @@
-use crate::{Object, RealField};
-use bbox::BoundingBox;
+use crate::{BoundingBox, Object, RealField};
+use nalgebra as na;
 use num_traits::Float;
 use std::sync::mpsc::{sync_channel, Receiver, SyncSender};
 
@@ -11,7 +11,7 @@ pub struct MockObject<S: RealField> {
     normal_call_sender: Option<SyncSender<na::Point3<S>>>,
 }
 
-impl<S: ::std::fmt::Debug + Float + RealField> MockObject<S> {
+impl<S: std::fmt::Debug + Float + RealField> MockObject<S> {
     pub fn new(value: S, normal: na::Vector3<S>) -> Self {
         Self::new_with_bbox(value, normal, BoundingBox::infinity())
     }
@@ -30,7 +30,7 @@ impl<S: ::std::fmt::Debug + Float + RealField> MockObject<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for MockObject<S> {
+impl<S: std::fmt::Debug + RealField + Float + From<f32>> Object<S> for MockObject<S> {
     fn approx_value(&self, _: &na::Point3<S>, _: S) -> S {
         self.value
     }

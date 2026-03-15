@@ -1,4 +1,5 @@
 use crate::{normal_from_object, BoundingBox, Object, RealField};
+use nalgebra as na;
 use num_traits::Float;
 use std::fmt::Debug;
 
@@ -22,11 +23,11 @@ pub struct Mesh<S: RealField + Debug> {
 
 impl<S: Debug + RealField + Float + From<f64> + From<f32>> Mesh<S> {
     /// Create a new Mesh from a [STL file](https://en.wikipedia.org/wiki/STL_(file_format)).
-    pub fn try_new(stl_filename: &str) -> ::std::io::Result<Self> {
-        let mut file = ::std::fs::OpenOptions::new()
+    pub fn try_new(stl_filename: &str) -> std::io::Result<Self> {
+        let mut file = std::fs::OpenOptions::new()
             .read(true)
             .open(stl_filename)?;
-        let mesh = ::stl_io::read_stl(&mut file)?;
+        let mesh = stl_io::read_stl(&mut file)?;
         mesh.validate()?;
         let vertices = mesh
             .vertices
@@ -238,7 +239,7 @@ fn distance_point_face<S: Debug + RealField + From<f64> + Float>(
     )
 }
 
-fn bbox_for_mesh<S: RealField + From<f32> + Float>(mesh: &::stl_io::IndexedMesh) -> BoundingBox<S> {
+fn bbox_for_mesh<S: RealField + From<f32> + Float>(mesh: &stl_io::IndexedMesh) -> BoundingBox<S> {
     mesh.vertices
         .iter()
         .fold(BoundingBox::neg_infinity(), |mut bbox, v| {
@@ -271,7 +272,9 @@ impl<S: RealField + Float + From<f64> + From<f32>> Object<S> for Mesh<S> {
 
 #[cfg(test)]
 mod test {
+    use approx::assert_ulps_eq;
     use super::*;
+    use nalgebra as na;
 
     #[test]
     fn test_point_over_line() {
@@ -367,7 +370,7 @@ mod test {
         let steps = 100;
         let dist = 100.0;
         for i in 0..steps {
-            let angle = f64::from(i) * ::std::f64::consts::PI / f64::from(steps);
+            let angle = f64::from(i) * std::f64::consts::PI / f64::from(steps);
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
@@ -388,7 +391,7 @@ mod test {
         let steps = 10;
         let dist = 100.0;
         for i in 0..steps {
-            let angle = f64::from(i) * ::std::f64::consts::PI / f64::from(steps);
+            let angle = f64::from(i) * std::f64::consts::PI / f64::from(steps);
             let x = -angle.cos() * dist;
             let y = angle.sin() * dist;
             let p = na::Vector3::new(x, y, 0.);
