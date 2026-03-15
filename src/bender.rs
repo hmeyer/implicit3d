@@ -1,4 +1,5 @@
 use crate::{BoundingBox, Object, PrimitiveParameters, RealField};
+use nalgebra as na;
 use num_traits::{Float, FloatConst};
 
 /// Bender create an implicit function that represents a bended version of it's input.
@@ -11,7 +12,7 @@ pub struct Bender<S: RealField> {
     bbox: BoundingBox<S>,
 }
 
-impl<S: RealField + From<f32> + Float + ::num_traits::FloatConst> Object<S> for Bender<S> {
+impl<S: RealField + From<f32> + Float + num_traits::FloatConst> Object<S> for Bender<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -83,8 +84,8 @@ impl<S: RealField + Float + FloatConst + From<f32>> Bender<S> {
     fn bend_normal(&self, v: na::Vector3<S>, polar_p: na::Point3<S>) -> na::Vector3<S> {
         let v = self.tilt_normal(v, polar_p);
         let phi = polar_p.x;
-        let v2 = ::na::Vector2::new(v.x, -v.y);
-        let trans = ::na::Rotation2::new(phi);
+        let v2 = na::Vector2::new(v.x, -v.y);
+        let trans = na::Rotation2::new(phi);
         let rv2 = trans.transform_vector(&v2);
         na::Vector3::new(rv2.x, rv2.y, v.z)
     }
@@ -92,8 +93,10 @@ impl<S: RealField + Float + FloatConst + From<f32>> Bender<S> {
 
 #[cfg(test)]
 mod test {
+    use approx::assert_relative_eq;
     use super::*;
     use crate::test::MockObject;
+    use nalgebra as na;
 
     #[test]
     fn values_in_quadrants() {

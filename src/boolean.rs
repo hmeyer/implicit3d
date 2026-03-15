@@ -1,6 +1,7 @@
 use crate::{
     normal_from_object, BoundingBox, Object, PrimitiveParameters, RealField, ALWAYS_PRECISE,
 };
+use nalgebra as na;
 use num_traits::Float;
 
 const FADE_RANGE: f32 = 0.1;
@@ -303,8 +304,10 @@ fn rvmax<S: Float + From<f32>>(v: &[S], r: S, exact_range: S) -> S {
 
 #[cfg(test)]
 mod test {
+    use approx::assert_ulps_eq;
     use super::*;
     use crate::test::MockObject;
+    use nalgebra as na;
 
     #[test]
     fn union() {

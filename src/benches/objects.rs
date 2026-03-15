@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate bencher;
-
-use bencher::Bencher;
+use bencher::{benchmark_group, benchmark_main, Bencher};
 use implicit3d::{
     Intersection, Object, PlaneNegX, PlaneNegY, PlaneNegZ, PlaneX, PlaneY, PlaneZ, RealField,
     Sphere, Twister,

@@ -1,4 +1,5 @@
 use crate::{BoundingBox, Object, RealField};
+use nalgebra as na;
 use num_traits::Float;
 
 /// A cylinder along the Z-Axis
@@ -21,7 +22,7 @@ impl<S: RealField + Float> Cylinder<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cylinder<S> {
+impl<S: std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cylinder<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -66,7 +67,7 @@ impl<S: RealField + Float + From<f32>> Cone<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cone<S> {
+impl<S: std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cone<S> {
     fn bbox(&self) -> &BoundingBox<S> {
         &self.bbox
     }
@@ -92,7 +93,9 @@ impl<S: ::std::fmt::Debug + RealField + From<f32> + Float> Object<S> for Cone<S>
 
 #[cfg(test)]
 mod test {
+    use approx::assert_ulps_eq;
     use crate::*;
+    use nalgebra as na;
 
     #[test]
     fn cylinder() {

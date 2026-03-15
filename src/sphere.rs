@@ -1,4 +1,5 @@
 use crate::{BoundingBox, Object, RealField};
+use nalgebra as na;
 use num_traits::Float;
 
 /// A sphere. Simple.
@@ -18,7 +19,7 @@ impl<S: RealField + Float> Sphere<S> {
     }
 }
 
-impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for Sphere<S> {
+impl<S: std::fmt::Debug + RealField + Float + From<f32>> Object<S> for Sphere<S> {
     fn approx_value(&self, p: &na::Point3<S>, slack: S) -> S {
         let approx = self.bbox.distance(p);
         if approx <= slack {
@@ -37,7 +38,9 @@ impl<S: ::std::fmt::Debug + RealField + Float + From<f32>> Object<S> for Sphere<
 
 #[cfg(test)]
 mod test {
+    use approx::assert_ulps_eq;
     use crate::*;
+    use nalgebra as na;
 
     #[test]
     fn simple() {
